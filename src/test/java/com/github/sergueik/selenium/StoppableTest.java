@@ -1,96 +1,65 @@
 package com.github.sergueik.selenium;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.Rectangle;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.UnsupportedCommandException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
-
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.internal.Coordinates;
-
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Paths;
 
 import java.lang.reflect.Method;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.Duration;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-// NOTE: deprecated. Used in scrolltoElement
-import org.openqa.selenium.internal.Locatable;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IconAndMessageDialog;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.UnsupportedCommandException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import org.testng.ITestResult;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IconAndMessageDialog;
-import org.eclipse.jface.window.ApplicationWindow;
-
-import org.eclipse.swt.*;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-
 /**
- * Selected test scenarios for Selenium WebDriver
+ * Stoppable test example
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
  */
 
-public class SuspendabeTest {
+public class StoppableTest {
 	public int scriptTimeout = 5;
 	public int flexibleWait = 60; // too long
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
-	private static long highlightInterval = 100;
 
 	private static final boolean headless = Boolean
 			.parseBoolean(System.getenv("HEADLESS"));
@@ -105,8 +74,8 @@ public class SuspendabeTest {
 	public Alert alert;
 	public JavascriptExecutor js;
 	public TakesScreenshot screenshot;
-	private static String handle = null;
 
+	@SuppressWarnings("deprecation")
 	@BeforeClass
 	public void beforeClass() {
 
@@ -134,22 +103,24 @@ public class SuspendabeTest {
 		// no cookies are allowed
 
 		chromeOptions.setExperimentalOption("prefs", chromePrefs);
-		// TODO: jni
-		if (System.getProperty("os.arch").contains("64")) {
-			String[] paths = new String[] {
-					"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-					"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" };
-			// check file existence
-			for (String path : paths) {
-				File exe = new File(path);
-				System.err.println("Inspecting browser path: " + path);
-				if (exe.exists()) {
-					chromeOptions.setBinary(path);
+		if (osName.equals("windows")) {
+			// TODO: use jni to find out the CPU arch
+			if (System.getProperty("os.arch").contains("64")) {
+				String[] paths = new String[] {
+						"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+						"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" };
+				// check file existence
+				for (String path : paths) {
+					File exe = new File(path);
+					System.err.println("Inspecting browser path: " + path);
+					if (exe.exists()) {
+						chromeOptions.setBinary(path);
+					}
 				}
+			} else {
+				chromeOptions.setBinary(
+						"c:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
 			}
-		} else {
-			chromeOptions.setBinary(
-					"c:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
 		}
 		for (String optionAgrument : (new String[] {
 				"--user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0",
@@ -318,7 +289,9 @@ public class SuspendabeTest {
 		public static final int CONTINUE_ID = IDialogConstants.CLIENT_ID;
 		public static final String CONTINUE_LABEL = "Continue";
 		private Image image;
+		@SuppressWarnings("unused")
 		private Label label;
+		@SuppressWarnings("unused")
 		private String message;
 
 		public BlockTestDialogEx(Shell parent) {
@@ -326,8 +299,8 @@ public class SuspendabeTest {
 
 			// Create the image
 			try {
-				image = new Image(parent.getDisplay(),
-						new FileInputStream("src\\main\\resources\\images\\watchglass.png"));
+				image = new Image(parent.getDisplay(), new FileInputStream(
+						"src\\main\\resources\\images\\watchglass.png"));
 			} catch (FileNotFoundException e) {
 				System.err.println("Exception: " + e.toString());
 			}
@@ -336,6 +309,7 @@ public class SuspendabeTest {
 			message = "Continue test?";
 		}
 
+		@SuppressWarnings("unused")
 		public void setMessage(String message) {
 			this.message = message;
 		}

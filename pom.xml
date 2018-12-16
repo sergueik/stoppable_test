@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.mycompany.app</groupId>
-  <artifactId>selenium_tests_intrude</artifactId>
+  <groupId>com.github.sergueik.swet</groupId>
+  <artifactId>stoppable_test</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
   <name>app</name>
@@ -29,21 +29,12 @@
     <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <phantomjsdriver.version>1.2.1</phantomjsdriver.version>
     <selenium.version>3.13.0</selenium.version>
-    <selenium-firefox-driver.version>3.13.0</selenium-firefox-driver.version>
-    <!-- TODO:
-with 2.53.1
-java.lang.NoClassDefFoundError: org/openqa/selenium/remote/DesiredCapabilities
-with 3.13.0
-java.lang.NoClassDefFoundError: org/openqa/selenium/remote/JsonToBeanConverter
--->
     <testng.version>6.11</testng.version>
     <guava.version>23.1</guava.version>
     <browser.name>chrome</browser.name>
     <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
     <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-    <sikulixapi.version>1.1.0</sikulixapi.version>
     <eclipse.swt.version>4.3</eclipse.swt.version>
     <jface.version>3.3.0-I20070606-0010</jface.version>
     <eclipse.swt.artifactId>org.eclipse.swt.win32.win32.x86_64</eclipse.swt.artifactId>
@@ -65,25 +56,10 @@ java.lang.NoClassDefFoundError: org/openqa/selenium/remote/JsonToBeanConverter
       <version>${hamcrest-date.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.mongodb</groupId>
-      <artifactId>mongo-java-driver</artifactId>
-      <version>3.6.1</version>
-    </dependency>
-    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
       <version>${hamcrest-all.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>1.10.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sikulix</groupId>
-      <artifactId>sikulixapi</artifactId>
-      <version>${sikulixapi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -117,11 +93,6 @@ java.lang.NoClassDefFoundError: org/openqa/selenium/remote/JsonToBeanConverter
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-firefox-driver</artifactId>
-      <version>${selenium-firefox-driver.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-server</artifactId>
       <version>${selenium.version}</version>
     </dependency>
@@ -131,29 +102,9 @@ java.lang.NoClassDefFoundError: org/openqa/selenium/remote/JsonToBeanConverter
       <version>${selenium.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.codeborne</groupId>
-      <artifactId>phantomjsdriver</artifactId>
-      <version>${phantomjsdriver.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!--
-    <dependency>
-     <groupId>org.seleniumhq.selenium</groupId>
-     <artifactId>selenium-server-standalone</artifactId>
-     <version>3.3.1</version>
-     <scope>system</scope>
-     <systemPath>${project.basedir}/src/main/resources/selenium-server-standalone-3.3.1.jar</systemPath>
-    </dependency>
-    -->
-    <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-remote-driver</artifactId>
       <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20080701</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
@@ -167,21 +118,6 @@ java.lang.NoClassDefFoundError: org/openqa/selenium/remote/JsonToBeanConverter
       </exclusions>
     </dependency>
   </dependencies>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.opera</groupId>
-        <artifactId>firefoxdriver</artifactId>
-        <version>1.1</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-remote-driver</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <build>
     <plugins>
       <plugin>
@@ -233,7 +169,7 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
           <trimStackTrace>false</trimStackTrace>
           <encoding>${project.build.sourceEncoding}</encoding>
           <!--
-	  NOTE: specifying the suite XML file prevents surefile from scannint all tests casses and execute everything with the method name mask match
+	  NOTE: specifying the suite XML file prevents surefile from scanning every tests cass and execute everything with the method name mask match
           <suiteXmlFiles>
             <suiteXmlFile>src/test/resources/suites/testng.xml</suiteXmlFile>
 	  </suiteXmlFiles>
@@ -272,66 +208,6 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>properties</id>
-      <properties>
-        <!-- https://www.mojohaus.org/properties-maven-plugin/usage.html -->
-        <property.filepath>target/classes</property.filepath>
-        <username>sergueik2016</username>
-        <username>automationnewuser24@gmail.com</username>
-        <password>${env.TEST_PASSWORD}</password>
-        <!-- when not set will result in the verbatim value 'password' = '${env.TEST_PASSWORD}'-->
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>properties-maven-plugin</artifactId>
-            <version>1.0.0</version>
-            <executions>
-              <execution>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>write-project-properties</goal>
-                </goals>
-                <configuration>
-                  <outputFile>
-                ${project.build.outputDirectory}/test.properties
-              </outputFile>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <!-- this maven-surefire-plugin does not seem to be used during the test phase, removed -->
-        </plugins>
-      </build>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-    </profile>
-    <profile>
-      <id>chrome</id>
-      <properties>
-        <browser.name>chrome</browser.name>
-      </properties>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-    </profile>
-    <profile>
-      <id>edge</id>
-      <properties>
-        <browser.name>edge</browser.name>
-      </properties>
-    </profile>
-    <profile>
-      <id>firefox</id>
-      <properties>
-        <browser.name>firefox</browser.name>
-      </properties>
-    </profile>
-  </profiles>
   <repositories>
     <repository>
       <id>ossrh</id>
@@ -369,4 +245,5 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
       <url>http://labs.consol.de/maven/repository/</url>
     </repository>
   </repositories>
+  <description>This demonstrates launching GUI dialog to stop the Selenium test until 'Continue'  button is pressed</description>
 </project>
