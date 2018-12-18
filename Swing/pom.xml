@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.sergueik.selenium_utils</groupId>
-  <artifactId>stoppable_test_javafx</artifactId>
+  <artifactId>stoppable_test_swing</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
   <name>app</name>
@@ -232,5 +232,5 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
       <url>http://labs.consol.de/maven/repository/</url>
     </repository>
   </repositories>
-  <description>This demonstrates launching GUI dialog to stop the Selenium test until 'Continue'  button is pressed (JavaFx version)</description>
+  <description>This demonstrates launching GUI dialog to stop the Selenium test until 'Continue'  button is pressed (Swing version)</description>
 </project>

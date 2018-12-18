@@ -1,4 +1,4 @@
-package com.github.sergueik.selenium;
+package com.github.sergueik.selenium_utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,16 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IconAndMessageDialog;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.WindowConstants;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -51,7 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * Stoppable test example
+ * Stoppable test example (Swing version)
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
  */
 
@@ -64,8 +63,9 @@ public class StoppableTest {
 	private static final boolean headless = Boolean
 			.parseBoolean(System.getenv("HEADLESS"));
 	private static String baseURL = "https://www.linux.org"; // "https://www.urbandictionary.com/";
-    // NOTE: some sites may be blocked via content filtering
-    // Sorry, www.urbandictionary.com has been blocked by your network administrator.
+	// NOTE: some sites may be blocked via content filtering
+	// Sorry, www.urbandictionary.com has been blocked by your network
+	// administrator.
 	private static String osName = getOSName();
 	private static int instanceCount = 0;
 	private static String altURL = "https://www.linux.org.ru/";
@@ -123,8 +123,8 @@ public class StoppableTest {
 				chromeOptions.setBinary(
 						"c:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
 			}
-		}  else {
-}
+		} else {
+		}
 		for (String optionAgrument : (new String[] {
 				"--user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0",
 				"--allow-running-insecure-content", "--allow-insecure-localhost",
@@ -211,19 +211,16 @@ public class StoppableTest {
 	public void test1() {
 		// String handle = createWindow(altURL);
 		String name = "Window_" + instanceCount++;
-		// inject an anchor element -  will likely appear at the bottom of the page
+		// inject an anchor element - will likely appear at the bottom of the page
 		injectElement(name);
 		WebElement element = driver.findElement(By.id(name));
 		sleep(1000);
-		// scroll  to the new page element
+		// scroll to the new page element
 		scroll(element);
-		// stop the test until user chooses to continue 
-		final Display display = new Display();
-		final Shell shell = new Shell(display);
-
-		System.err.println("Hold the test");
-		System.err.println("Creating new dialog on the display");
-		(new BlockTestDialogEx(shell)).open();
+		// stop the test until user chooses to continue
+		System.err
+				.println("Hold the test: creating new Swing dialog on the display");
+		new TestDialog();
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
@@ -231,8 +228,8 @@ public class StoppableTest {
 		sleep(5000);
 	}
 
-	private void injectElement(String name){
-		
+	private void injectElement(String name) {
+
 		// Inject an anchor element
 		executeScript(
 				"var anchorTag = document.createElement('a'); "
@@ -248,7 +245,7 @@ public class StoppableTest {
 		// HTML, HEAD, BODY, some element
 	}
 
-	private void scroll(WebElement element){		
+	private void scroll(WebElement element) {
 		try {
 			// element.getLocation()
 			Point location = element.getLocation();
@@ -299,65 +296,39 @@ public class StoppableTest {
 			throw new RuntimeException("Script execution failed.");
 		}
 	}
+	// based on:
+	// http://www.java2s.com/Tutorial/Java/0240__Swing/SetDefaultCloseOperationforDialog.htm
+	// updating to hide the interim app
 
-	private static class BlockTestDialogEx extends IconAndMessageDialog {
+	private static class TestDialog extends JFrame {
+		JDialog d = new JDialog(this, "Selenium test stopped", true);
 
-		public static final int CONTINUE_ID = IDialogConstants.CLIENT_ID;
-		public static final String CONTINUE_LABEL = "Continue";
-		private Image image;
-		@SuppressWarnings("unused")
-		private Label label;
-		@SuppressWarnings("unused")
-		private String message;
+		public TestDialog() {
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		public BlockTestDialogEx(Shell parent) {
-			super(parent);
+			d.getContentPane().add(new JLabel("Click the Continue button"),
+					BorderLayout.CENTER);
+			JButton closeIt = new JButton("Continue");
+			closeIt.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("Closing dialog");
+					d.dispose();
+					d.setVisible(false);
+					setVisible(false);
+					System.out.println("Closed dialog.");
+					dispose();
+				}
+			});
+			d.getContentPane().add(closeIt, BorderLayout.SOUTH);
+			d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			d.pack();
 
-			// Create the image
-			try {
-				image = new Image(parent.getDisplay(), new FileInputStream(
-						"src/main/resources/images/watchglass.png"));
-			} catch (FileNotFoundException e) {
-				System.err.println("Exception: " + e.toString());
-			}
-
-			// Set the default message
-			message = "Continue test?";
-		}
-
-		@SuppressWarnings("unused")
-		public void setMessage(String message) {
-			this.message = message;
-		}
-
-		public boolean close() {
-			if (image != null)
-				image.dispose();
-			return super.close();
-		}
-
-		protected Control createDialogArea(Composite parent) {
-			createMessageArea(parent);
-			// Create a composite to hold the label
-			Composite composite = new Composite(parent, SWT.NONE);
-			// Create the label for the "hidden" message
-			// label = new Label(composite, SWT.LEFT);
-			return composite;
-		}
-
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, CONTINUE_ID, CONTINUE_LABEL, false);
-		}
-
-		protected void buttonPressed(int buttonId) {
-			if (buttonId == CONTINUE_ID) {
-				setReturnCode(buttonId);
-				close();
-			}
-		}
-
-		protected Image getImage() {
-			return image;
+			getContentPane().add(new JLabel("Placeholder label"));
+			pack();
+			setSize(200, 200);
+			setVisible(false);
+			d.setVisible(true);
 		}
 	}
+
 }

@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.sergueik.swet</groupId>
-  <artifactId>stoppable_test</artifactId>
+  <groupId>com.github.sergueik.selenium_utils</groupId>
+  <artifactId>stoppable_test_swt</artifactId>
   <packaging>jar</packaging>
-  <description>This demonstrates launching GUI dialog to stop the Selenium test until the 'Continue' button is pressed</description>
-  <version>0.1-SNAPSHOT</version>
+  <description>This demonstrates launching GUI dialog to stop the Selenium test until the 'Continue' button is pressed (based on Eclipse SWT)</description>
+  <version>0.2-SNAPSHOT</version>
   <name>app</name>
   <url>http://maven.apache.org</url>
   <developers>
