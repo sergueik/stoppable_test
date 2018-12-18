@@ -4,6 +4,7 @@
   <groupId>com.github.sergueik.swet</groupId>
   <artifactId>stoppable_test</artifactId>
   <packaging>jar</packaging>
+  <description>This demonstrates launching GUI dialog to stop the Selenium test until the 'Continue' button is pressed</description>
   <version>0.1-SNAPSHOT</version>
   <name>app</name>
   <url>http://maven.apache.org</url>
@@ -208,6 +209,90 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>windows32</id>
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <build_os>win32</build_os>
+        <eclipse.swt.artifactId>org.eclipse.swt.win32.win32.x86</eclipse.swt.artifactId>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows64</id>
+      <activation>
+        <os>
+          <family>dos</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <eclipse.swt.artifactId>org.eclipse.swt.win32.win32.x86_64</eclipse.swt.artifactId>
+        <build_os>win64</build_os>
+      </properties>
+    </profile>
+    <!-- NOTE: "/profiles/profile/id/text()" must be unique -->
+    <profile>
+      <id>windows64_2</id>
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <build_os>win64</build_os>
+        <eclipse.swt.artifactId>org.eclipse.swt.win32.win32.x86_64</eclipse.swt.artifactId>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac64</id>
+      <activation>
+        <os>
+          <family>mac</family>
+          <arch>x86_64</arch>
+        </os>
+      </activation>
+      <properties>
+        <build_os>mac64</build_os>
+        <eclipse.swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</eclipse.swt.artifactId>
+        <selenium.version>2.48.0</selenium.version>
+        <!-- for Safari extensions, the latest Selenium Driver is 2.48.0. -->
+      </properties>
+    </profile>
+    <profile>
+      <id>unix32</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <arch>i386</arch>
+        </os>
+      </activation>
+      <properties>
+        <build_os>unix32</build_os>
+        <selenium.version>2.53.1</selenium.version>
+        <eclipse.swt.artifactId>org.eclipse.swt.gtk.linux.x86</eclipse.swt.artifactId>
+      </properties>
+    </profile>
+    <profile>
+      <id>unix64</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <build_os>unix64</build_os>
+        <eclipse.swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</eclipse.swt.artifactId>
+      </properties>
+    </profile>
+  </profiles>
   <repositories>
     <repository>
       <id>ossrh</id>
@@ -245,5 +330,4 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
       <url>http://labs.consol.de/maven/repository/</url>
     </repository>
   </repositories>
-  <description>This demonstrates launching GUI dialog to stop the Selenium test until 'Continue'  button is pressed</description>
 </project>

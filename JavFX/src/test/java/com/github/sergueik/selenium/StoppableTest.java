@@ -13,17 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IconAndMessageDialog;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -50,20 +39,41 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.Scene;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 /**
  * Stoppable test example
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
  */
 
-public class StoppableTest {
+// Dialog part based on:
+// https://examples.javacodegeeks.com/desktop-java/javafx/javafx-stage-example/
+@SuppressWarnings("restriction") // eclipse:MARS
+public class StoppableTest extends Application {
 	public int scriptTimeout = 5;
-	public int flexibleWait = 60; // too long
+	public int flexibleWait = 60; // possibly too long
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
 
 	private static final boolean headless = Boolean
 			.parseBoolean(System.getenv("HEADLESS"));
-	private static String baseURL = "https://www.urbandictionary.com/";
+	private static String baseURL = "https://www.linux.org"; // "https://www.urbandictionary.com/";
+	// NOTE: some sites may be blocked via content filtering
+	// Sorry, www.urbandictionary.com has been blocked by your network
+	// administrator.
 	private static String osName = getOSName();
 	private static int instanceCount = 0;
 	private static String altURL = "https://www.linux.org.ru/";
@@ -121,6 +131,7 @@ public class StoppableTest {
 				chromeOptions.setBinary(
 						"c:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
 			}
+		} else {
 		}
 		for (String optionAgrument : (new String[] {
 				"--user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0",
@@ -200,15 +211,35 @@ public class StoppableTest {
 
 	@AfterTest(alwaysRun = true)
 	public void afterTest() {
+		System.err.println("Finish the test");
 		driver.quit();
 	}
 
 	@Test(enabled = true)
 	public void test1() {
 		// String handle = createWindow(altURL);
+		String name = "Window_" + instanceCount++;
+		// inject an anchor element - will likely appear at the bottom of the page
+		injectElement(name);
+		WebElement element = driver.findElement(By.id(name));
+		sleep(1000);
+		// scroll to the new page element
+		scroll(element);
+		// stop the test until user chooses to continue
+		System.err.println("Hold the test: Creating new dialog on the display");
+		// NOTE: cannot instantiate JavaFx Application an inner class, the class
+		// must itself become a subclass of one
+		Application.launch(new String[] {});
+		// continue the test
+		System.err.println("Continue the test");
+		element.click();
+		// TODO: deal with handles and waits to produce a consistent behavior
+		sleep(5000);
+	}
+
+	private void injectElement(String name) {
 
 		// Inject an anchor element
-		String name = "Window_" + instanceCount++;
 		executeScript(
 				"var anchorTag = document.createElement('a'); "
 						+ "anchorTag.appendChild(document.createTextNode('nwh'));"
@@ -221,9 +252,9 @@ public class StoppableTest {
 				name, altURL);
 		// common error with this approach: Element is not clickable at point
 		// HTML, HEAD, BODY, some element
+	}
 
-		WebElement element = driver.findElement(By.id(name));
-		sleep(1000);
+	private void scroll(WebElement element) {
 		try {
 			// element.getLocation()
 			Point location = element.getLocation();
@@ -233,15 +264,6 @@ public class StoppableTest {
 			System.err.println("Exception (ignored) " + e.toString());
 			// ignore
 		}
-
-		final Display display = new Display();
-		final Shell shell = new Shell(display);
-
-		System.err.println("Hold the test");
-		System.err.println("Creating new dialog on the display");
-		(new BlockTestDialogEx(shell)).open();
-		System.err.println("Finish the test");
-
 	}
 
 	// Scroll
@@ -284,64 +306,54 @@ public class StoppableTest {
 		}
 	}
 
-	private static class BlockTestDialogEx extends IconAndMessageDialog {
+	private static Boolean done = false;
 
-		public static final int CONTINUE_ID = IDialogConstants.CLIENT_ID;
-		public static final String CONTINUE_LABEL = "Continue";
-		private Image image;
-		@SuppressWarnings("unused")
-		private Label label;
-		@SuppressWarnings("unused")
-		private String message;
+	public static void main(String[] args) {
+		Application.launch(args);
+	}
 
-		public BlockTestDialogEx(Shell parent) {
-			super(parent);
-
-			// Create the image
-			try {
-				image = new Image(parent.getDisplay(), new FileInputStream(
-						"src\\main\\resources\\images\\watchglass.png"));
-			} catch (FileNotFoundException e) {
-				System.err.println("Exception: " + e.toString());
+	public void start(Stage stage) {
+		System.err.println("Display the Stage. ");
+		stage.setTitle("Selenium Test stopped until button is pressed");
+		Button button = new Button("Continue");
+		button.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				System.err.println("Close the Stage. ");
+				stage.close();
+				done = true;
 			}
+		});
 
-			// Set the default message
-			message = "Continue test?";
+		Label styleLabel = new Label("Stage Style");
+		VBox vBox = new VBox(button);
+		Scene scene = new Scene(vBox, 200, 100);
+		stage.setScene(scene);
+		stage.setWidth(400);
+		stage.setHeight(100);
+		this.show(stage, styleLabel, StageStyle.DECORATED);
+
+
+		if (done) {
+			Platform.exit();
+		}
+	}
+
+	private void show(Stage stage, Label styleLabel, StageStyle style) {
+		// Set the text for the label to match the style
+		styleLabel.setText(style.toString());
+		// Use the specified style
+		stage.initStyle(style);
+
+		// For a transparent style, set the scene fill to null. Otherwise, the
+		// content area will have the default white background of the scene.
+		if (style == StageStyle.TRANSPARENT) {
+			stage.getScene().setFill(null);
+			stage.getScene().getRoot().setStyle("-fx-background-color: transparent");
+		} else if (style == StageStyle.UNIFIED) {
+			stage.getScene().setFill(Color.TRANSPARENT);
 		}
 
-		@SuppressWarnings("unused")
-		public void setMessage(String message) {
-			this.message = message;
-		}
-
-		public boolean close() {
-			if (image != null)
-				image.dispose();
-			return super.close();
-		}
-
-		protected Control createDialogArea(Composite parent) {
-			createMessageArea(parent);
-			// Create a composite to hold the label
-			Composite composite = new Composite(parent, SWT.NONE);
-			// Create the label for the "hidden" message
-			// label = new Label(composite, SWT.LEFT);
-			return composite;
-		}
-
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, CONTINUE_ID, CONTINUE_LABEL, false);
-		}
-
-		protected void buttonPressed(int buttonId) {
-			if (buttonId == CONTINUE_ID) {
-				setReturnCode(buttonId);
-				close();
-			}
-		}
-
-		protected Image getImage() {
-			return image;
-		}
+		// Display the stage
+		stage.show();
 	}
 }
