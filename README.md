@@ -11,7 +11,7 @@ through a commong custom dialog like one in [Swing Widgets](https://github.com/e
 [Nebula - Supplemental Widgets for SWT](https://github.com/eclipse/nebula)
 to display the details of the test exception from the Junit or TestNg exception handler.
 
-![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test.png)
+![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swt.png)
 
 ### Demo
 The test is launched in  a usual fashion, via maven.
@@ -20,7 +20,7 @@ mvn test
 ```
 The examples in this directory borrows one of the test scenarios from another repository [selenium test](https://github.com/sergueik/selenium_tests). The test in question performs some scrolling actions in Chrome then gets stopped and the UI dialog is shown. It has been seen to successfully resume execution after 10...15 minutes of being paused. It is uncertain atm if the test would be able to continue after arbitrary long interruption.
 
-![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test_javafx.png)
+![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-javafx.png)
 
 ### Note
 
