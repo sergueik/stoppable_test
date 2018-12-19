@@ -14,9 +14,13 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -301,6 +305,10 @@ public class StoppableTest {
 	// updating to hide the interim app
 
 	private static class TestDialog extends JFrame {
+
+		private final int width = 400;
+		private final int height = 150;
+		private final int borderWidth = 40;
 		JDialog d = new JDialog(this, "Selenium test stopped", true);
 
 		public TestDialog() {
@@ -308,24 +316,35 @@ public class StoppableTest {
 
 			d.getContentPane().add(new JLabel("Click the Continue button"),
 					BorderLayout.CENTER);
-			JButton closeIt = new JButton("Continue");
-			closeIt.addActionListener(new ActionListener() {
+			JButton continueButton = new JButton("Continue");
+			continueButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Closing dialog");
+					// System.err.println("Closing dialog");
 					d.dispose();
 					d.setVisible(false);
 					setVisible(false);
-					System.out.println("Closed dialog.");
+					// System.err.println("Closed dialog.");
 					dispose();
 				}
 			});
-			d.getContentPane().add(closeIt, BorderLayout.SOUTH);
+			d.getContentPane().add(continueButton, BorderLayout.SOUTH);
 			d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			d.getRootPane().setBorder(BorderFactory.createEmptyBorder(borderWidth,
+					borderWidth, borderWidth, borderWidth));
 			d.pack();
-
+			// TODO: timer
+			/*
+			Container Cntnr = getContentPane();
+			Cntnr.setLayout(new FlowLayout());
+			Cntnr.add(Btn);
+			Cntnr.add(Txt);
+			*/
 			getContentPane().add(new JLabel("Placeholder label"));
+			getContentPane().add(new JLabel(new ImageIcon(
+					String.format("%s/src/main/resources/images/watchglass.png",
+							System.getProperty("user.dir")))));
 			pack();
-			setSize(200, 200);
+			setSize(width, height);
 			setVisible(false);
 			d.setVisible(true);
 		}

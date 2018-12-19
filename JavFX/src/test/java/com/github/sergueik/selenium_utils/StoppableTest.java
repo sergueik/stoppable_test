@@ -1,14 +1,9 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Paths;
-
 import java.lang.reflect.Method;
-
+import java.nio.file.Paths;
 import java.time.Duration;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -30,9 +25,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import org.testng.ITestResult;
-
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
@@ -41,21 +34,18 @@ import org.testng.annotations.Test;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.Scene;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * Stoppable test example
+ * Stoppable test example - JavaFx
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
  */
 
@@ -67,6 +57,9 @@ public class StoppableTest extends Application {
 	public int flexibleWait = 60; // possibly too long
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
+	private static Boolean done = false;
+	private final int width = 400;
+	private final int height = 150;
 
 	private static final boolean headless = Boolean
 			.parseBoolean(System.getenv("HEADLESS"));
@@ -306,14 +299,15 @@ public class StoppableTest extends Application {
 		}
 	}
 
-	private static Boolean done = false;
-
+	// can not create static inner class for JavaFx Application: would fail to
+	// initialize
 	public void start(Stage stage) {
-		stage.setTitle("Selenium Test stopped until \"Continue\" button is pressed");
+		stage
+				.setTitle("Selenium Test stopped until \"Continue\" button is pressed");
 		Button button = new Button("Continue");
 		button.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
-				System.err.println("Close the Stage. ");
+				// System.err.println("Close the Stage. ");
 				stage.close();
 				done = true;
 			}
@@ -323,10 +317,9 @@ public class StoppableTest extends Application {
 		VBox vBox = new VBox(button);
 		Scene scene = new Scene(vBox, 200, 100);
 		stage.setScene(scene);
-		stage.setWidth(400);
-		stage.setHeight(100);
+		stage.setWidth(width);
+		stage.setHeight(height);
 		this.show(stage, styleLabel, StageStyle.DECORATED);
-
 
 		if (done) {
 			Platform.exit();
