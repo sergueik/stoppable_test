@@ -4,7 +4,7 @@
   <groupId>com.github.sergueik.selenium_utils</groupId>
   <artifactId>stoppable_test_javafx</artifactId>
   <packaging>jar</packaging>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <name>app</name>
   <url>http://maven.apache.org</url>
   <developers>

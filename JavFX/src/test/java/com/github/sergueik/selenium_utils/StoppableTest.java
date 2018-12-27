@@ -35,18 +35,34 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javafx.collections.ObservableList;
+
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+
+
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-// a type with the same simple name is already defined by the single-type-import of org.openqa.selenium.Alert
-// import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DialogPane;
+
+//a type with the same simple name is already defined by the single-type-import of org.openqa.selenium.Alert
+//import javafx.scene.control.Alert;
+
 import javafx.scene.Parent;
+
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import javafx.scene.text.Text;
-import javafx.scene.control.*;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 
 /**
  * Stoppable test example - JavaFx
@@ -360,6 +376,61 @@ public class StoppableTest extends Application {
 			controller.setInputData(data);
 		} else {
 			System.err.println("Controller is not reachable.");
+		}
+	}
+	public static class VanillaControllerEx {
+		// The JavaFx controller class can be statically defined within another		
+		// make sure to ensure the "/*@fx:controller" attribute is defined correctly  
+		private String closeMessage = "Continue";
+
+		private Map<String, String> inputData = new HashMap<>();
+
+		public void setInputData(Map<String, String> inputData) {
+			this.inputData = inputData;
+			this.contentPreformatted.textProperty().set(inputData.get((Object) "code"));
+			this.headerText.textProperty().set(inputData.get((Object) "header text"));
+			this.contentSummary.textProperty().set(inputData.get((Object) "summary message"));
+			this.continueButton.textProperty().set(inputData.get((Object) "continue button text"));
+			this.closeMessage = inputData.get((Object) "close message");
+		}
+
+		public Map<String, String> getInputData() {
+			return this.inputData;
+		}
+
+		private Stage mainStage;
+
+		@FXML
+		private Button continueButton;
+
+		@FXML
+		private Label headerText;
+
+		@FXML
+		private Label contentSummary;
+
+		@FXML
+		private Label contentPreformatted;
+
+		private Parent fxmlEdit;
+
+		private Stage stage;
+
+		public void setMainStage(Stage mainStage) {
+			this.mainStage = mainStage;
+		}
+
+		@FXML
+		private void initialize() {
+			continueButton.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent event) {
+					if (closeMessage != null) {
+						System.err.println(closeMessage);
+					}
+					Platform.exit();
+				}
+			});
 		}
 	}
 }
