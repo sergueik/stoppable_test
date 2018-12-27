@@ -47,6 +47,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.text.Text;
 import javafx.scene.control.*;
+
 /**
  * Stoppable test example - JavaFx
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
@@ -61,7 +62,11 @@ public class StoppableTest extends Application {
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
 	private static Boolean done = false;
+	private static Boolean debug = false;
 	private final int width = 400;
+	private final String projectPrefix = "src/test/java";
+	private static String packagePath;
+
 	private final int height = 150;
 
 	private static final boolean headless = Boolean
@@ -77,7 +82,7 @@ public class StoppableTest extends Application {
 	public WebDriver driver;
 	public WebDriverWait wait;
 	public Actions actions;
-//	public Alert alert;
+	// public Alert alert;
 	public JavascriptExecutor js;
 	public TakesScreenshot screenshot;
 
@@ -224,9 +229,8 @@ public class StoppableTest extends Application {
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test: Creating new dialog on the display");
 		// NOTE: cannot instantiate JavaFx Application an inner class, the class
-		// must itself become a subclass of one
+		// must itself become a subclass of one javaFx Application
 		Application.launch(new String[] {});
-/// launch(args);
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
@@ -311,25 +315,42 @@ public class StoppableTest extends Application {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		Map<String, String> data = new HashMap<>();
 		data.put("title", "Selenium Dialog (WIP)");
-		data.put("code", "Exception in Application start method\n" +
-"java.lang.reflect.InvocationTargetException\n" +
-"        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n" +
-"        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n" +
-"        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n" +
-"        at java.lang.reflect.Method.invoke(Method.java:498)");
-		// without the absolute path, would search current directory
-		System.err.println("Loading from: " + Paths.get(System.getProperty("user.dir")).resolve("src/test/java/com/github/sergueik/selenium_utils/dialog_css_demo.fxml").toString() );
-		/* FXMLLoader*/ fxmlLoader
-				.setLocation(
-						new URL("file:///" + Paths.get(System.getProperty("user.dir")).resolve("src/test/java/com/github/sergueik/selenium_utils/dialog_css_demo.fxml").toString()));
+		data.put("close message", "Abort dialog is closed");
+		data.put("header text", "The test is being aborted");
+		data.put("summary message", "Exception in the code");
+		data.put("continue button text", "Abort");
+		data.put("code",
+				"Exception in Application start method\n"
+						+ "java.lang.reflect.InvocationTargetException\n"
+						+ "        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n"
+						+ "        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n"
+						+ "        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n"
+						+ "        at java.lang.reflect.Method.invoke(Method.java:498)");
+
+		// NOTE: Without the absolute path, would search current directory,
+		// but appears to fail when run from sureFire
+		packagePath = this.getClass().getPackage().getName().replace(".", "/");
+
+		if (debug) {
+			System.err.println("Loading from: " + Paths
+					.get(System.getProperty("user.dir")).resolve(String.format("%s/%s/%s",
+							projectPrefix, packagePath, "dialog_view.fxml"))
+					.toString());
+		}
+		fxmlLoader.setLocation(new URL(
+				"file:///" + Paths.get(System.getProperty("user.dir")).resolve(String
+						.format("%s/%s/%s", projectPrefix, packagePath, "dialog_view.fxml"))
+						.toString()));
 		Parent parent = fxmlLoader.load();
 		VanillaControllerEx controller = fxmlLoader.getController();
 		controller.setMainStage(stage);
 
 		Scene scene = new Scene(parent, 600, 650); // TODO: measure?
-		scene.getStylesheets().add("file:///" + Paths.get(System.getProperty("user.dir")).resolve("src/test/java/com/github/sergueik/selenium_utils/dialog_css_demo.css").toString().replace("\\","/"));
-		data.put("summary",
-				"Summary of the test");
+		scene.getStylesheets().add("file:///" + Paths
+				.get(System.getProperty("user.dir")).resolve(String.format("%s/%s/%s",
+						projectPrefix, packagePath, "dialog_styles.css"))
+				.toString().replace("\\", "/"));
+
 		controller.setMainStage(stage);
 		stage.setTitle(data.get("title"));
 
@@ -340,9 +361,5 @@ public class StoppableTest extends Application {
 		} else {
 			System.err.println("Controller is not reachable.");
 		}
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 }
