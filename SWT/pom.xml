@@ -5,7 +5,7 @@
   <artifactId>stoppable_test_swt</artifactId>
   <packaging>jar</packaging>
   <description>This demonstrates launching GUI dialog to stop the Selenium test until the 'Continue' button is pressed (based on Eclipse SWT)</description>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <name>app</name>
   <url>http://maven.apache.org</url>
   <developers>
@@ -169,35 +169,7 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
         <configuration>
           <trimStackTrace>false</trimStackTrace>
           <encoding>${project.build.sourceEncoding}</encoding>
-          <!--
-	  NOTE: specifying the suite XML file prevents surefile from scanning every tests cass and execute everything with the method name mask match
-          <suiteXmlFiles>
-            <suiteXmlFile>src/test/resources/suites/testng.xml</suiteXmlFile>
-	  </suiteXmlFiles>
-	  -->
-          <!-- For parallel runs with e.g. Vagrant https://github.com/sergueik/selenium-fluxbox  
-	  <argLine>-Dfile.encoding=${project.build.sourceEncoding} -Dparallel=tests -DthreadCount=2 </argLine>
-	  -->
-          <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-          <!-- Skip the default running of this plug-in (or everything is run twice...see below) -->
-          <skip>true</skip>
         </configuration>
-        <executions>
-          <execution>
-            <id>unit-tests</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <skip>false</skip>
-              <systemPropertyVariables>
-                <webdriver.driver>${browser.name}</webdriver.driver>
-                <property.filepath>${property.filepath}</property.filepath>
-              </systemPropertyVariables>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -244,8 +244,8 @@ public class StoppableTest extends Application {
 		scroll(element);
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test: Creating new dialog on the display");
-		// NOTE: cannot instantiate JavaFx Application an inner class, the class
-		// must itself become a subclass of one javaFx Application
+		// NOTE: cannot instantiate JavaFx Application from an inner class, the BaseTest class itself
+		// must become a subclass of javaFx Application class
 		Application.launch(new String[] {});
 		// continue the test
 		System.err.println("Continue the test");
@@ -334,7 +334,7 @@ public class StoppableTest extends Application {
 		data.put("close message", "Abort dialog is closed");
 		data.put("header text", "The test is being aborted");
 		data.put("summary message", "Exception in the code");
-		data.put("continue button text", "Abort");
+		data.put("button text", "Abort");
 		data.put("code",
 				"Exception in Application start method\n"
 						+ "java.lang.reflect.InvocationTargetException\n"
@@ -390,7 +390,7 @@ public class StoppableTest extends Application {
 			this.contentPreformatted.textProperty().set(inputData.get((Object) "code"));
 			this.headerText.textProperty().set(inputData.get((Object) "header text"));
 			this.contentSummary.textProperty().set(inputData.get((Object) "summary message"));
-			this.continueButton.textProperty().set(inputData.get((Object) "continue button text"));
+			this.continueButton.textProperty().set(inputData.get((Object) "button text"));
 			this.closeMessage = inputData.get((Object) "close message");
 		}
 

@@ -29,6 +29,8 @@ at a low cost that a different SWT jars need to be used for Mac OSX, Linux and W
 The latter is easily solvable through property activated profiles, but may become a little of an extra challenge if the test suite needs maven profiles for its own purpose.
 JavaFx and Swing versions have no platform specific dependencies.
 
+![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swing.png)
+
 ### See Also
   * [Eclipse Standard Widget Toolkit](https://www.eclipse.org/swt/)
   * [Tutorial for eclipse SWT and Jface dialogs](http://www.vogella.com/tutorials/EclipseDialogs/article.html)
