@@ -7,6 +7,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -33,17 +36,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
+import javafx.fxml.FXMLLoader;
+// a type with the same simple name is already defined by the single-type-import of org.openqa.selenium.Alert
+// import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-
+import javafx.scene.text.Text;
+import javafx.scene.control.*;
 /**
  * Stoppable test example - JavaFx
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
@@ -74,7 +77,7 @@ public class StoppableTest extends Application {
 	public WebDriver driver;
 	public WebDriverWait wait;
 	public Actions actions;
-	public Alert alert;
+//	public Alert alert;
 	public JavascriptExecutor js;
 	public TakesScreenshot screenshot;
 
@@ -223,6 +226,7 @@ public class StoppableTest extends Application {
 		// NOTE: cannot instantiate JavaFx Application an inner class, the class
 		// must itself become a subclass of one
 		Application.launch(new String[] {});
+/// launch(args);
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
@@ -301,45 +305,44 @@ public class StoppableTest extends Application {
 
 	// can not create static inner class for JavaFx Application: would fail to
 	// initialize
-	public void start(Stage stage) {
-		stage
-				.setTitle("Selenium Test stopped until \"Continue\" button is pressed");
-		Button button = new Button("Continue");
-		button.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent event) {
-				// System.err.println("Close the Stage. ");
-				stage.close();
-				done = true;
-			}
-		});
+	@SuppressWarnings("unused")
+	@Override
+	public void start(Stage stage) throws Exception {
+		FXMLLoader fxmlLoader = new FXMLLoader();
+		Map<String, String> data = new HashMap<>();
+		data.put("title", "Selenium Dialog (WIP)");
+		data.put("code", "Exception in Application start method\n" +
+"java.lang.reflect.InvocationTargetException\n" +
+"        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n" +
+"        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n" +
+"        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n" +
+"        at java.lang.reflect.Method.invoke(Method.java:498)");
+		// without the absolute path, would search current directory
+		System.err.println("Loading from: " + Paths.get(System.getProperty("user.dir")).resolve("src/test/java/com/github/sergueik/selenium_utils/dialog_css_demo.fxml").toString() );
+		/* FXMLLoader*/ fxmlLoader
+				.setLocation(
+						new URL("file:///" + Paths.get(System.getProperty("user.dir")).resolve("src/test/java/com/github/sergueik/selenium_utils/dialog_css_demo.fxml").toString()));
+		Parent parent = fxmlLoader.load();
+		VanillaControllerEx controller = fxmlLoader.getController();
+		controller.setMainStage(stage);
 
-		Label styleLabel = new Label("Stage Style");
-		VBox vBox = new VBox(button);
-		Scene scene = new Scene(vBox, 200, 100);
+		Scene scene = new Scene(parent, 600, 650); // TODO: measure?
+		scene.getStylesheets().add("file:///" + Paths.get(System.getProperty("user.dir")).resolve("src/test/java/com/github/sergueik/selenium_utils/dialog_css_demo.css").toString().replace("\\","/"));
+		data.put("summary",
+				"Summary of the test");
+		controller.setMainStage(stage);
+		stage.setTitle(data.get("title"));
+
 		stage.setScene(scene);
-		stage.setWidth(width);
-		stage.setHeight(height);
-		this.show(stage, styleLabel, StageStyle.DECORATED);
-
-		if (done) {
-			Platform.exit();
+		stage.show();
+		if (controller != null) {
+			controller.setInputData(data);
+		} else {
+			System.err.println("Controller is not reachable.");
 		}
 	}
 
-	private void show(Stage stage, Label styleLabel, StageStyle style) {
-		// Set the text for the label to match the style
-		styleLabel.setText(style.toString());
-		// Use the specified style
-		stage.initStyle(style);
-
-		// For a transparent style, set the scene fill to null. Otherwise, the
-		// content area will have the default white background of the scene.
-		if (style == StageStyle.TRANSPARENT) {
-			stage.getScene().setFill(null);
-			stage.getScene().getRoot().setStyle("-fx-background-color: transparent");
-		} else if (style == StageStyle.UNIFIED) {
-			stage.getScene().setFill(Color.TRANSPARENT);
-		}
-		stage.show();
+	public static void main(String[] args) {
+		launch(args);
 	}
 }
