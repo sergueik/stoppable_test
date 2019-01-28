@@ -8,7 +8,7 @@
   <url>http://maven.apache.org</url>
   <name>root app module</name>
   <modules>
-    <module>JavFX</module>
+    <module>javaFX</module>
     <module>Swing</module>
     <module>SWT</module>
   </modules>

@@ -1,9 +1,12 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.nio.file.Paths;
+
 import java.time.Duration;
+
+import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,6 +31,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -41,7 +45,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
