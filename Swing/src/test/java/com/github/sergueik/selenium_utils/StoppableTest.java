@@ -20,10 +20,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 
@@ -302,28 +304,42 @@ public class StoppableTest {
 	}
 	// based on:
 	// http://www.java2s.com/Tutorial/Java/0240__Swing/SetDefaultCloseOperationforDialog.htm
+	// https://stackoverflow.com/questions/2713190/how-to-remove-border-around-buttons
 	// updating to hide the interim app
 
 	private static class TestDialog extends JFrame {
 
+		private final boolean debug = false;
 		private final int width = 400;
-		private final int height = 150;
+		private final int height = 250;
 		private final int borderWidth = 40;
 		JDialog d = new JDialog(this, "Selenium test stopped", true);
 
 		public TestDialog() {
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-			d.getContentPane().add(new JLabel("Click the Continue button"),
-					BorderLayout.CENTER);
+			Icon watchglassIcon = new ImageIcon(
+					String.format("%s/src/main/resources/images/watchglass.png",
+							System.getProperty("user.dir")));
+			JButton watchglassJbutton = new JButton(watchglassIcon);
+			watchglassJbutton.setBorderPainted(false);
+			watchglassJbutton.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+			watchglassJbutton.setContentAreaFilled(false);
+
+			d.getContentPane().add(watchglassJbutton, BorderLayout.CENTER);
+
 			JButton continueButton = new JButton("Continue");
 			continueButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					// System.err.println("Closing dialog");
+					if (debug) {
+						System.err.println("Closing dialog");
+					}
 					d.dispose();
 					d.setVisible(false);
 					setVisible(false);
-					// System.err.println("Closed dialog.");
+					if (debug) {
+						System.err.println("Closed dialog.");
+					}
 					dispose();
 				}
 			});
@@ -333,16 +349,6 @@ public class StoppableTest {
 					borderWidth, borderWidth, borderWidth));
 			d.pack();
 			// TODO: timer
-			/*
-			Container Cntnr = getContentPane();
-			Cntnr.setLayout(new FlowLayout());
-			Cntnr.add(Btn);
-			Cntnr.add(Txt);
-			*/
-			getContentPane().add(new JLabel("Placeholder label"));
-			getContentPane().add(new JLabel(new ImageIcon(
-					String.format("%s/src/main/resources/images/watchglass.png",
-							System.getProperty("user.dir")))));
 			pack();
 			setSize(width, height);
 			setVisible(false);
