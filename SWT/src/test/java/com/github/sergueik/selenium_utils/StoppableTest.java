@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
 
@@ -179,8 +181,9 @@ public class StoppableTest {
 		wait = new WebDriverWait(driver, flexibleWait);
 
 		// Selenium Driver version sensitive code: 3.13.0 vs. 3.8.0 and older
-		wait.pollingEvery(Duration.ofMillis(pollingInterval));
-		// wait.pollingEvery(pollingInterval, TimeUnit.MILLISECONDS);
+// java has no precompiler #ifdef 
+//		wait.pollingEvery(Duration.ofMillis(pollingInterval));
+		wait.pollingEvery(pollingInterval, TimeUnit.MILLISECONDS);
 
 		screenshot = ((TakesScreenshot) driver);
 		js = ((JavascriptExecutor) driver);

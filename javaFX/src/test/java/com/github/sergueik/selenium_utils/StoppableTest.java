@@ -422,7 +422,8 @@ public class StoppableTest extends Application {
 		public void setMainStage(Stage mainStage) {
 			this.mainStage = mainStage;
 		}
-
+		// TODO: on OSX
+                // org.apache.maven.surefire.booter.SurefireBooterForkException: The forked VM terminated without properly saying goodbye. VM crash or System.exit called?
 		@FXML
 		private void initialize() {
 			continueButton.setOnAction(new EventHandler<ActionEvent>() {
