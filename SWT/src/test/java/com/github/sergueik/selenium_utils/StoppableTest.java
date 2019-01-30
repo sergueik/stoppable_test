@@ -111,7 +111,7 @@ public class StoppableTest {
 
 		chromeOptions.setExperimentalOption("prefs", chromePrefs);
 		if (osName.equals("windows")) {
-			// TODO: use jni to find out the CPU arch
+			// TODO: find out the CPU arch using jni 
 			if (System.getProperty("os.arch").contains("64")) {
 				String[] paths = new String[] {
 						"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
@@ -237,7 +237,6 @@ public class StoppableTest {
 
 		// continue the test
 		element.click();
-		// TODO: deal with handles and waits to produce a consistent behavior
 		sleep(5000);
 	}
 

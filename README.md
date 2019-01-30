@@ -1,16 +1,18 @@
 ### Info
 
-This project demonstrates suspending Selenium test through an
-[SWT](http://www.java2s.com/Tutorial/Java/0280__SWT/Catalog0280__SWT.htm) and [JavaFx](http://www.java2s.com/Tutorials/Java/JavaFX/index.htm) and [Swing](http://www.java2s.com/Tutorial/Java/0240__Swing/Catalog0240__Swing.htm) library dialog widgets.
+This project demonstrates pausing the Selenium test through an modal dialog which is available or can be easily composed from library dialog widgets in all common java GUI frameworks:
+  * [SWT](http://www.java2s.com/Tutorial/Java/0280__SWT/Catalog0280__SWT.htm) 
+  * [JavaFx](http://www.java2s.com/Tutorials/Java/JavaFX/index.htm) 
+  * [Swing](http://www.java2s.com/Tutorial/Java/0240__Swing/Catalog0240__Swing.htm)
 
-A very basic dialog widget is sufficient for the cause, despite differences in the iunder the hood implementations of the widget event loop processing across three mainstream Java UI frameworks.
+The most basic dialog widget is sufficient for the cause, despite slight differences in the under the hood implementations of the widget event loop processing by these mainstream Java UI frameworks.
 
-This technique can be used to post a plain Image Button Dialog to let the test be simply stopped /resumed or comunicate some information from the test through a common custom dialoss available in [Swing Widgets](https://github.com/eugener/oxbow) or [Nebula - Supplemental Widgets for SWT](https://github.com/eclipse/nebula) e.g. to print test exception stack from the Junit or testNg exception handler.
+This technique can be used to add an Image Button Dialog and text to communicate  the name of the test method that is s paused. Alternatively one may add text box or an accordion widget to comunicate some extra information from the test through one of common custom dialogs available in [Swing Widgets](https://github.com/eugener/oxbow) or [Nebula - Supplemental Widgets for SWT](https://github.com/eclipse/nebula) e.g. to print test exception stack from the Junit or testNg exception handler.
 
 ![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swt.png)
 
 ### Demo
-The  example directory contsins the testNg test. The equivalent jUnit case is arriving shortly (not expected to lead to a difference in test behavior)
+The  example directory contains an testNg test. The equivalent jUnit case is arriving shortly and isn't expected to lead to a difference in test behavior.
 The test is launched in a usual fashion, via maven. Running from the project directory builds and tests all 3 frameworks one after another.
 ```cmd
 mvn test

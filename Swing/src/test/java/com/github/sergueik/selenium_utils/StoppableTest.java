@@ -1,33 +1,12 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Paths;
-
 import java.lang.reflect.Method;
-
+import java.nio.file.Paths;
 import java.time.Duration;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.WindowConstants;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -46,9 +25,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import org.testng.ITestResult;
-
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
@@ -302,58 +279,4 @@ public class StoppableTest {
 			throw new RuntimeException("Script execution failed.");
 		}
 	}
-	// based on:
-	// http://www.java2s.com/Tutorial/Java/0240__Swing/SetDefaultCloseOperationforDialog.htm
-	// https://stackoverflow.com/questions/2713190/how-to-remove-border-around-buttons
-	// updating to hide the interim app
-
-	private static class TestDialog extends JFrame {
-
-		private final boolean debug = false;
-		private final int width = 400;
-		private final int height = 250;
-		private final int borderWidth = 40;
-		JDialog d = new JDialog(this, "Selenium test stopped", true);
-
-		public TestDialog() {
-			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-			Icon watchglassIcon = new ImageIcon(
-					String.format("%s/src/main/resources/images/watchglass.png",
-							System.getProperty("user.dir")));
-			JButton watchglassJbutton = new JButton(watchglassIcon);
-			watchglassJbutton.setBorderPainted(false);
-			watchglassJbutton.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-			watchglassJbutton.setContentAreaFilled(false);
-
-			d.getContentPane().add(watchglassJbutton, BorderLayout.CENTER);
-
-			JButton continueButton = new JButton("Continue");
-			continueButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (debug) {
-						System.err.println("Closing dialog");
-					}
-					d.dispose();
-					d.setVisible(false);
-					setVisible(false);
-					if (debug) {
-						System.err.println("Closed dialog.");
-					}
-					dispose();
-				}
-			});
-			d.getContentPane().add(continueButton, BorderLayout.SOUTH);
-			d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			d.getRootPane().setBorder(BorderFactory.createEmptyBorder(borderWidth,
-					borderWidth, borderWidth, borderWidth));
-			d.pack();
-			// TODO: timer
-			pack();
-			setSize(width, height);
-			setVisible(false);
-			d.setVisible(true);
-		}
-	}
-
 }

@@ -6,6 +6,7 @@
   <packaging>jar</packaging>
   <version>0.3-SNAPSHOT</version>
   <name>app</name>
+  <description>This demonstrates launching GUI dialog to pause the Selenium test until 'Continue'  button is pressed (JavaFx version)</description>
   <url>http://maven.apache.org</url>
   <developers>
     <developer>
@@ -226,5 +227,4 @@ Fatal error compiling: invalid flag: -Dfile.encoding=UTF-8 -> [Help 1]
       <url>http://labs.consol.de/maven/repository/</url>
     </repository>
   </repositories>
-  <description>This demonstrates launching GUI dialog to pause the Selenium test until 'Continue'  button is pressed (JavaFx version)</description>
 </project>
