@@ -11,6 +11,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 // import javax.swing.JLabel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.WindowConstants;
 
 // based on:
@@ -20,20 +28,25 @@ import javax.swing.WindowConstants;
 @SuppressWarnings("serial")
 public class TestDialog extends JFrame {
 
+	private String callerText = null;
 	private final boolean debug = false;
 	private final int width = 400;
 	private final int height = 250;
 	private final int borderWidth = 40;
 	private final int imageIconEmptyBorderWidth = 4;
-	JDialog jDialog = new JDialog(this, "Selenium test stopped", true);
+	JDialog jDialog = null;
 
-	public TestDialog() {
+	private void paintTestDialog() {
+		jDialog = new JDialog(this, String.format("Selenium test %s stopped",
+				String.format("%s\u2026", callerText)), true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		Icon watchglassIcon = new ImageIcon(
 				String.format("%s/src/main/resources/images/watchglass.png",
 						System.getProperty("user.dir")));
 		JButton watchglassJbutton = new JButton(watchglassIcon);
+		// http://www.java2s.com/Tutorial/Java/0240__Swing/ButtonwithuserdrawImageicon.htm
+		repaint();
 		watchglassJbutton.setBorderPainted(false);
 		watchglassJbutton.setBorder(BorderFactory.createEmptyBorder(
 				imageIconEmptyBorderWidth, imageIconEmptyBorderWidth,
@@ -42,7 +55,10 @@ public class TestDialog extends JFrame {
 
 		jDialog.getContentPane().add(watchglassJbutton, BorderLayout.CENTER);
 
-		JButton continueButton = new JButton("Continue");
+		// custom icon
+		JButton continueButton = new JButton(
+				String.format("Continue Test %s", callerText),
+				new OwnDrawnBoxIcon(Color.blue, 1));
 		continueButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (debug) {
@@ -65,9 +81,48 @@ public class TestDialog extends JFrame {
 		// TODO: timer
 		setSize(width, height);
 		jDialog.setVisible(true);
+
+	}
+
+	public TestDialog(String text) {
+		this.callerText = text;
+		paintTestDialog();
+	}
+
+	public TestDialog() {
+		this.callerText = "unknown";
+		paintTestDialog();
+
 	}
 
 	public static void main(String[] args) {
 		new TestDialog();
+	}
+
+	private static class OwnDrawnBoxIcon implements Icon {
+		private Color color;
+
+		private int borderWidth;
+
+		OwnDrawnBoxIcon(java.awt.Color color, int borderWidth) {
+			this.color = color;
+			this.borderWidth = borderWidth;
+		}
+
+		public int getIconWidth() {
+			return 20;
+		}
+
+		public int getIconHeight() {
+			return 20;
+		}
+
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			g.setColor(Color.black);
+			g.fillRect(x, y, getIconWidth(), getIconHeight());
+			g.setColor(color);
+			g.fillRect(x + borderWidth, y + borderWidth,
+					getIconWidth() - 2 * borderWidth, getIconHeight() - 2 * borderWidth);
+		}
 	}
 }
