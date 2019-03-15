@@ -9,8 +9,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import java.lang.reflect.Method;
 
 import java.time.Duration;
@@ -111,6 +112,8 @@ public class ServiziCookieTest {
 
 	private static Connection conn;
 	private static String sql;
+	private static final String extractQuery = "SELECT username, cookie FROM login_cookies where username = '?'";
+	private static final String insertQuery = "INSERT INTO login_cookies(username,cookie) VALUES(?,?)";
 
 	@SuppressWarnings("deprecation")
 	@BeforeClass
@@ -273,6 +276,13 @@ public class ServiziCookieTest {
 	public void afterTest() {
 		System.err.println("Finish the test");
 		driver.quit();
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Test(enabled = false)
@@ -363,6 +373,8 @@ public class ServiziCookieTest {
 	public void useCookieTest() throws Exception {
 		getCookieTest();
 		System.err.println("Getting the cookies");
+		System.err.println("Got cookie: " + readData(usernome));
+		// TODO: read cookie from the file
 		Set<Cookie> cookies = driver.manage().getCookies();
 		System.err.println("Closing the browser");
 		wait = null;
@@ -772,16 +784,46 @@ public class ServiziCookieTest {
 	}
 
 	// http://www.sqlitetutorial.net/sqlite-java/insert/
-	public static void insertData(String name, String jsonString) {
-		sql = "INSERT INTO login_cookies(username,cookie) VALUES(?,?)";
-		try (PreparedStatement statement = conn.prepareStatement(sql)) {
-			statement.setString(1, name);
+	public static void insertData(String username, String jsonString) {
+		try (PreparedStatement _statement = conn.prepareStatement(insertQuery)) {
+			_statement.setString(1, username);
 			// TODO: time stamp
-			statement.setString(2, jsonString);
-			statement.executeUpdate();
+			_statement.setString(2, jsonString);
+			_statement.executeUpdate();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 		}
 	}
 
+	public static String readData(String username) {
+		String value = null;
+		try {
+			// Statement _statement = conn.createStatement();
+			// ResultSet _result = _statement.executeQuery(extractQuery);
+			// java.sql.SQLException: not implemented by SQLite JDBC driver
+			// PreparedStatement _statement = conn.prepareStatement(extractQuery);
+			// java.lang.ArrayIndexOutOfBoundsException:
+			// at org.sqlite.jdbc3.JDBC3PreparedStatement.setString
+			// _statement.setString(1, username);
+			// ResultSet _result = _statement.executeQuery();
+			Statement _statement = conn.createStatement();
+			ResultSet _result = _statement.executeQuery(String.format(
+					/* TODO: replace in 
+					extractQuery */ "SELECT username, cookie FROM login_cookies where username = '%s'",
+					username));
+
+			System.err.println("Got results:");
+			while (_result.next()) {
+				// process results one row at a time
+				String usernameOut = _result.getString(1);
+				String cookie = _result.getString(2);
+				System.err.println("username: " + usernameOut);
+				System.err.println("cookie:\n" + cookie);
+				value = cookie;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return value;
+	}
 }
