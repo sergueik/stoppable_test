@@ -113,7 +113,8 @@ public class ServiziCookieTest {
 
 	private static Connection conn;
 	private static String sql;
-	private static final String extractQuery = "SELECT username, cookie FROM login_cookies where username = '?'";
+	private static final String extractQuery = "SELECT username, cookie FROM login_cookies where username = ?";
+	private static final String extractQueryTemplate = "SELECT username, cookie FROM login_cookies where username = '%s'";
 	private static final String insertQuery = "INSERT INTO login_cookies(username,cookie) VALUES(?,?)";
 
 	@SuppressWarnings("deprecation")
@@ -234,17 +235,17 @@ public class ServiziCookieTest {
 			// dbURL = "jdbc:sqlite:performance.db";
 			conn = DriverManager.getConnection(dbURL);
 			if (conn != null) {
-				// System.out.println("Connected to the database");
+				// System.err.println("Connected to the database");
 				DatabaseMetaData databaseMetadata = conn.getMetaData();
-				System.out.println("Driver name: " + databaseMetadata.getDriverName());
-				System.out
+				System.err.println("Driver name: " + databaseMetadata.getDriverName());
+				System.err
 						.println("Driver version: " + databaseMetadata.getDriverVersion());
-				System.out.println(
+				System.err.println(
 						"Product name: " + databaseMetadata.getDatabaseProductName());
-				System.out.println(
+				System.err.println(
 						"Product version: " + databaseMetadata.getDatabaseProductVersion());
 				createNewTable();
-				insertData("name", "dummy");
+				// insertData("name", "dummy");
 				// conn.close();
 			}
 		} catch (ClassNotFoundException | SQLException ex) {
@@ -815,11 +816,12 @@ public class ServiziCookieTest {
 	}
 
 	// http://www.sqlitetutorial.net/sqlite-java/insert/
-	public static void insertData(String username, String jsonString) {
+	public static void insertData(String username, String jsonDataString) {
 		try (PreparedStatement _statement = conn.prepareStatement(insertQuery)) {
+			System.err.println("Prepare statement: " + insertQuery);
 			_statement.setString(1, username);
 			// TODO: time stamp
-			_statement.setString(2, jsonString);
+			_statement.setString(2, jsonDataString);
 			_statement.executeUpdate();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -829,23 +831,35 @@ public class ServiziCookieTest {
 	public static String readData(String username) {
 		String value = null;
 		try {
-			// Statement _statement = conn.createStatement();
-			// ResultSet _result = _statement.executeQuery(extractQuery);
-			// java.sql.SQLException: not implemented by SQLite JDBC driver
-			// PreparedStatement _statement = conn.prepareStatement(extractQuery);
+			System.err.println("Prepare statement: " + extractQuery);
+			PreparedStatement _statement = conn.prepareStatement(extractQuery);
+			_statement.setString(1, username);
+			ResultSet _result = _statement.executeQuery();
+			System.err.println("Got results:");
+			while (_result.next()) {
+				String usernameOut = _result.getString(1);
+				String jsonDataString = _result.getString(2);
+				System.err.println("username: " + usernameOut);
+				System.err.println("cookie:\n" + jsonDataString);
+				value = jsonDataString;
+			}
+		} catch (Exception e) {
+			System.err.println("Exception(ignored): " + e.toString());
+			e.printStackTrace();
+			// NOTE: there must be NO quotes around ? parameter in where or the
+			// following
 			// java.lang.ArrayIndexOutOfBoundsException:
 			// at org.sqlite.jdbc3.JDBC3PreparedStatement.setString
-			// _statement.setString(1, username);
-			// ResultSet _result = _statement.executeQuery();
+			// TODO: pre-validate
+			// see also extractQueryTemplate below
+		}
+		try {
 			Statement _statement = conn.createStatement();
-			ResultSet _result = _statement.executeQuery(String.format(
-					/* TODO: replace in 
-					extractQuery */ "SELECT username, cookie FROM login_cookies where username = '%s'",
-					username));
+			ResultSet _result = _statement
+					.executeQuery(String.format(insertQueryTemplate, username));
 
 			System.err.println("Got results:");
 			while (_result.next()) {
-				// process results one row at a time
 				String usernameOut = _result.getString(1);
 				String cookie = _result.getString(2);
 				System.err.println("username: " + usernameOut);
