@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -566,6 +567,36 @@ public class ServiziCookieTest {
 			verificationErrors.append(e.toString());
 		}
 		*/
+		int cnt = 0;
+		while (cnt < 10) {
+			List<WebElement> elements = driver
+					.findElements(By.xpath("//*[contains(@id,'msgClickDay')]"));
+			if (elements.size() > 0) {
+				System.err.println(elements.get(0).getText());
+				System.err.println("Waiting for F5 warning to disappear");
+				driver.navigate().refresh();
+				sleep(1000);
+				cnt = cnt + 1;
+			}
+		}
+		/*
+		WebElement element = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(
+						By.xpath("//*[contains(@id,'msgClickDay')]")));
+						*/
+		try {
+			// check if we can user stock methods or write own ?
+			wait.until(ExpectedConditions.invisibilityOfElementWithText(
+					By.xpath("//*[contains(@id,'msgClickDay')]"),
+					"Per aggiornare la pagina premere F5"));
+		} catch (TimeoutException | UnreachableBrowserException e) {
+			verificationErrors.append(e.toString());
+		}
+		/*
+		 //*[@id="ctl00_phContent_msgClickDay_lblMess"]/strong/text()[1]		
+		<span id="ctl00_phContent_msgClickDay_lblMess"><strong>Attenzione. All'approssimarsi dell'ora del 'Click Day' ricaricare continuamente la pagina fino a quando il pulsante di trasmissione non risulterà attivo.<br>Per aggiornare la pagina premere F5.</strong><br>NOTA: il tempo di riferimento 'Ora server' per l'invio delle domande verrà visualizzato in alto a destra nella barra del menu.</span>
+		 * */
+		sleep(120000);
 		doLogout();
 	}
 
