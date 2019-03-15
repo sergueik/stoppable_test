@@ -19,7 +19,7 @@ then
   # If Maven is installed to 'Applications' need to adjust the command line to: "mdfind -onlyin '/Applications' -name mvn"
   M2=$(mdfind -onlyin "${HOME}/Downloads" -name mvn | sed -n 's|^\(.*\)/mvn$|\1|p'|head -1)
 
-  if [ -z $M2 ] ; then
+  if [ -z $MAVEN_VERSION ] ; then
     MAVEN_VERSION='3.3.9'
     export M2_HOME="$HOME/Downloads/apache-maven-$MAVEN_VERSION"
     export M2="$M2_HOME/bin"
@@ -29,7 +29,8 @@ then
   fi
   export MAVEN_OPTS='-Xms256m -Xmx512m'
   export PATH=$M2_HOME/bin:$PATH
-  # following OSX-specific setting is critical for SWT, not for Swing or javaFX
+  # following OSX-specific launch option is only critical for SWT, 
+  # is ignored for Swing or javaFX
   # http://stackoverflow.com/questions/3976342/running-swt-based-cross-platform-jar-properly-on-a-mac
   # https://stackoverflow.com/questions/7527789/specifying-maven-memory-parameter-without-setting-maven-opts-environment-variabl/30441186#30441186
   LAUNCH_OPTS='-XstartOnFirstThread'

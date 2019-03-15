@@ -5,6 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import java.lang.reflect.Method;
 
 import java.time.Duration;
@@ -15,6 +21,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Formatter;
 import java.util.logging.Level;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.util.concurrent.TimeUnit;
 
@@ -73,6 +82,7 @@ import org.testng.annotations.Test;
  */
 
 public class ServiziCookieTest {
+
 	public int scriptTimeout = 5;
 	public int flexibleWait = 60; // too long
 	public int implicitWait = 1;
@@ -97,6 +107,10 @@ public class ServiziCookieTest {
 	public Alert alert;
 	public JavascriptExecutor js;
 	public TakesScreenshot screenshot;
+	private static final String sqlite_database_name = "login_cookies";
+
+	private static Connection conn;
+	private static String sql;
 
 	@SuppressWarnings("deprecation")
 	@BeforeClass
@@ -104,6 +118,7 @@ public class ServiziCookieTest {
 
 		loggingSb = new StringBuilder();
 		formatter = new Formatter(loggingSb, Locale.US);
+
 		System.setProperty("webdriver.chrome.driver",
 				osName.equals("windows")
 						? (new File("c:/java/selenium/chromedriver.exe")).getAbsolutePath()
@@ -203,6 +218,36 @@ public class ServiziCookieTest {
 		screenshot = ((TakesScreenshot) driver);
 		js = ((JavascriptExecutor) driver);
 
+		try {
+			// origin:
+			// https://www.tutorialspoint.com/sqlite/sqlite_java.htm
+			Class.forName("org.sqlite.JDBC");
+			String dbURL = resolveEnvVars(String.format(
+					"jdbc:sqlite:${USERPROFILE}\\Desktop\\%s.db", sqlite_database_name));
+			// NOTE: SQLite driver on its own will not create folders to construct
+			// path to the file,
+			// default is current project directory
+			// dbURL = "jdbc:sqlite:performance.db";
+			conn = DriverManager.getConnection(dbURL);
+			if (conn != null) {
+				// System.out.println("Connected to the database");
+				DatabaseMetaData databaseMetadata = conn.getMetaData();
+				System.out.println("Driver name: " + databaseMetadata.getDriverName());
+				System.out
+						.println("Driver version: " + databaseMetadata.getDriverVersion());
+				System.out.println(
+						"Product name: " + databaseMetadata.getDatabaseProductName());
+				System.out.println(
+						"Product version: " + databaseMetadata.getDatabaseProductVersion());
+				createNewTable();
+				insertData("name", "dummy");
+				// conn.close();
+			}
+		} catch (ClassNotFoundException | SQLException ex) {
+			ex.printStackTrace();
+		} finally {
+		}
+
 	}
 
 	@BeforeMethod
@@ -298,7 +343,9 @@ public class ServiziCookieTest {
 			.toString());
 			*/
 			JSONObject cookieJSONObject = new JSONObject(cookie);
-			System.err.println(cookieJSONObject.toString());
+			System.err.println("Insering: " + cookieJSONObject.toString());
+			insertData(usernome, cookieJSONObject.toString());
+
 			cookieJSONArray.put(cookieJSONObject);
 		}
 		JSONObject cookiesJSONObject = new JSONObject();
@@ -495,12 +542,18 @@ public class ServiziCookieTest {
 		// org.openqa.selenium.InvalidCookieDomainException:
 		driver.navigate().refresh();
 
+		// TODO: handle refreshes with Caution. As the 'Click Day' time approaches,
+		// reload the page continuously
+		// until the transmission button is active.
+		// To refresh the page press F5.
+		/*
 		System.err.println("Waiting for inbox");
 		try {
 			wait.until(ExpectedConditions.urlContains("#inbox"));
 		} catch (TimeoutException | UnreachableBrowserException e) {
 			verificationErrors.append(e.toString());
 		}
+		*/
 		doLogout();
 	}
 
@@ -682,4 +735,53 @@ public class ServiziCookieTest {
 		}
 		return value;
 	}
+
+	public static String resolveEnvVars(String input) {
+		if (null == input) {
+			return null;
+		}
+		Pattern p = Pattern.compile("\\$(?:\\{(?:env:)?(\\w+)\\}|(\\w+))");
+		Matcher m = p.matcher(input);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			String envVarName = null == m.group(1) ? m.group(2) : m.group(1);
+			String envVarValue = System.getenv(envVarName);
+			m.appendReplacement(sb,
+					null == envVarValue ? "" : envVarValue.replace("\\", "\\\\"));
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+
+	// http://www.sqlitetutorial.net/sqlite-java/create-table/
+	public static void createNewTable() {
+		sql = "DROP TABLE IF EXISTS login_cookies";
+		try (java.sql.Statement statement = conn.createStatement()) {
+			statement.execute(sql);
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+		sql = "CREATE TABLE IF NOT EXISTS login_cookies (\n"
+				+ "	id integer PRIMARY KEY,\n" + "	username text NOT NULL,\n"
+				+ "	cookie text\n" + ");";
+		try (java.sql.Statement statement = conn.createStatement()) {
+			statement.execute(sql);
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	// http://www.sqlitetutorial.net/sqlite-java/insert/
+	public static void insertData(String name, String jsonString) {
+		sql = "INSERT INTO login_cookies(username,cookie) VALUES(?,?)";
+		try (PreparedStatement statement = conn.prepareStatement(sql)) {
+			statement.setString(1, name);
+			// TODO: time stamp
+			statement.setString(2, jsonString);
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
 }
