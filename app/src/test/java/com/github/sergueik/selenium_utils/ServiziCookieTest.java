@@ -25,6 +25,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.logging.Level;
 
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
 
@@ -81,6 +84,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.ITestResult;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertTrue;
+
+// import static org.junit.Assert.assertTrue;
 /**
  * Stoppable test example (eclipse SWT version)
  * for login page with an arithmetic captcha
@@ -131,6 +137,8 @@ public class ServiziCookieTest {
 	private static final String extractQueryTemplate = "SELECT cookie, username, cookiename  FROM login_cookies where username = '%s'and cookiename = '%s'";
 	private static final String insertQuery = "INSERT INTO login_cookies(username, cookiename, cookie) VALUES(?,?,?)";
 	private static final String defaultKey = "name";
+	List<String> cookieNames = new ArrayList<>(
+			Arrays.asList(new String[] { "ASP.NET_SessionId", "ARRAffinity" }));
 
 	@SuppressWarnings("deprecation")
 	@BeforeClass
@@ -246,6 +254,7 @@ public class ServiziCookieTest {
 			// default is current project directory
 			// dbURL = "jdbc:sqlite:performance.db";
 			conn = DriverManager.getConnection(dbURL);
+			boolean createTable = false;
 			if (conn != null) {
 				// System.err.println("Connected to the database");
 				DatabaseMetaData databaseMetadata = conn.getMetaData();
@@ -256,9 +265,11 @@ public class ServiziCookieTest {
 						"Product name: " + databaseMetadata.getDatabaseProductName());
 				System.err.println(
 						"Product version: " + databaseMetadata.getDatabaseProductVersion());
-				createNewTable();
-				// insertData("name", "dummy", "cookie");
-				// conn.close();
+				if (createTable) {
+					createNewTable();
+					// insertData("name", "dummy", "cookie");
+					// conn.close();
+				}
 			}
 		} catch (ClassNotFoundException | SQLException ex) {
 			ex.printStackTrace();
@@ -299,9 +310,8 @@ public class ServiziCookieTest {
 		}
 	}
 
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void getCookieTest() {
-		// String handle = createWindow(altURL);
 		driver.get(baseURL);
 		WebElement element = driver
 				.findElement(By.xpath("//*[contains(text(), 'A C C E D I')]"));
@@ -317,11 +327,62 @@ public class ServiziCookieTest {
 		highlight(element);
 		element.clear();
 		element.sendKeys(passe);
+		// solve the arithmetic
+		element = driver.findElement(By.id("btnRobot"));
+		String arithCaptcha = element.getText();
+		System.err.println("Non sono un robot: " + arithCaptcha);
+		// 17 pi∙ 69 =
+		// 8 per 6 =
+		// 49 meno 48 =
+		// 30 divizo 5 =
 
+		Pattern pattern = Pattern
+				.compile("(\\d+)\\s+((?:per|divizo|meno|pi.))\\s+(\\d+)\\s*=\\s*");
+		Matcher matcher = pattern.matcher(arithCaptcha);
+
+		assertTrue(matcher.find());
+
+		Map<String, String> formOps = new HashMap<>();
+		formOps.put("per", "multiply");
+		formOps.put("diviso", "divide");
+		formOps.put("meno", "substract");
+		formOps.put("pi?", "add");
+		String opLoc = matcher.group(2);
+		String op = formOps.containsKey(opLoc) ? formOps.get(opLoc)
+				: formOps.get("pi?");
+		Integer left = Integer.parseInt(matcher.group(1));
+		Integer right = Integer.parseInt(matcher.group(3));
+		System.err.println(
+				"It is: " + left.toString() + " " + op + " " + right.toString());
+		Integer result = 0;
+		switch (op) {
+		case "multiply":
+			result = left * right;
+			break;
+		case "divide":
+			result = left / right;
+			break;
+		case "substract":
+			result = left - right;
+			break;
+		case "add":
+			result = left + right;
+			break;
+		default:
+			result = -1;
+		}
+
+		element = driver.findElement(By.id("ctl00_phContent_Login_txtRisultato"));
+		// #ctl00_phContent_Login_txtRisultato
+		highlight(element);
+		element.sendKeys(result.toString());
 		sleep(1000);
+		// input#ctl00_phContent_Login_btnCaptcha
+		// value="Rigenera"
+		/// onclick="javascript:__doPostBack('ctl00$phContent$Login$btnCaptcha','')"
 		final Display display = new Display();
 		final Shell shell = new Shell(display);
-
+		
 		System.err.println("Hold the test");
 		System.err.println("Creating new dialog on the display");
 		BlockTestDialogEx blockTestDialog = new BlockTestDialogEx(shell);
@@ -385,16 +446,9 @@ public class ServiziCookieTest {
 	private static Map<String, String> cookieDataMap = new HashMap<>();
 
 	@SuppressWarnings("deprecation")
-	@Test(enabled = true)
+	@Test(enabled = false)
 	public void useCookieTest() throws Exception {
 		getCookieTest();
-		/*
-		System.err.println("Getting the cookies");
-		String cookieData = extractData(usernome); // no longer enough
-		System.err.println("Got cookie: " + cookieData);
-		deserializeData(cookieData, Optional.of(cookieDataMap));
-		System.err.println(cookieDataMap);
-		*/
 		// NOTE: hack to trick compiler from unreachable statement to dead code
 		// if (true) {
 		if (false) {
@@ -578,9 +632,6 @@ public class ServiziCookieTest {
 		for (Cookie cookie : cookies) {
 			System.err.println("Loading cookie: " + cookie.getName());
 			// https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/Cookie.html
-			// Cookie(java.lang.String name, java.lang.String value, java.lang.String
-			// domain, java.lang.String path, java.util.Date expiry, boolean isSecure,
-			// boolean isHttpOnly)
 			Cookie cookieClone = new Cookie(cookie.getName(), cookie.getValue(),
 					cookie.getDomain(), cookie.getPath(),
 					(java.util.Date) cookie.getExpiry(), (boolean) cookie.isSecure(),
@@ -605,6 +656,116 @@ public class ServiziCookieTest {
 			return;
 		}
 
+		// TODO: handle refreshes with Caution. As the 'Click Day' time approaches,
+		// reload the page continuously
+		// until the transmission button is active.
+		// To refresh the page press F5.
+		/*
+		System.err.println("Waiting for inbox");
+		try {
+			wait.until(ExpectedConditions.urlContains("#inbox"));
+		} catch (TimeoutException | UnreachableBrowserException e) {
+			verificationErrors.append(e.toString());
+		}
+		*/
+		int cnt = 0;
+		while (cnt < 10) {
+			// pencil button
+			WebElement element = wait
+					.until(ExpectedConditions.visibilityOfElementLocated(
+							By.xpath("//*[contains(@id,'btnCompleta')][@title='Modifica']")));
+			System.err
+					.println("Pencil button:\n" + element.getAttribute("outerHTML"));
+			highlight(element);
+			element.click();
+			// navigates to
+			// http://bandi.servizi.politicheagricole.it/taxcredit/moduloTCR.aspx?ID=331
+			List<WebElement> elements = driver
+					.findElements(By.xpath("//*[contains(@id,'msgClickDay')]"));
+
+			if (elements.size() > 0) {
+				System.err.println(elements.get(0).getText());
+				System.err.println("Waiting for F5 warning to disappear");
+				driver.navigate().refresh();
+				sleep(1000);
+				cnt = cnt + 1;
+			}
+		}
+		/*
+		WebElement element = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(
+						By.xpath("//*[contains(@id,'msgClickDay')]")));
+						*/
+		try {
+			// check if we can user stock methods or write own ?
+			wait.until(ExpectedConditions.invisibilityOfElementWithText(
+					By.xpath("//*[contains(@id,'msgClickDay')]"),
+					"Per aggiornare la pagina premere F5"));
+		} catch (TimeoutException | UnreachableBrowserException e) {
+			verificationErrors.append(e.toString());
+		}
+		sleep(120000);
+		doLogout();
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test(enabled = false)
+	public void pureCookieTest() throws Exception {
+		driver.get(baseURL);
+
+		System.err.println("Loading cookies: " + cookieNames);
+
+		for (String cookieName : cookieNames) {
+
+			System.err.println("Loading cookie: " + cookieName);
+			// https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/Cookie.html
+			// Cookie(java.lang.String name, java.lang.String value, java.lang.String
+			// domain, java.lang.String path, java.util.Date expiry, boolean isSecure,
+			// boolean isHttpOnly)
+
+			String cookieData = extractData(usernome, cookieName);
+			System.err.println("Got cookie: " + cookieData);
+			deserializeData(cookieData, Optional.of(cookieDataMap));
+			System.err.println(cookieDataMap);
+
+			Cookie cookie = new Cookie(cookieDataMap.get("name"),
+					cookieDataMap.get("value"), cookieDataMap.get("domain"),
+					cookieDataMap.get("path"), (java.util.Date) null
+					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure")), Boolean.parseBoolean(cookieDataMap.get("httpOnly")));
+
+			driver.manage().addCookie(cookie);
+		}
+		// org.openqa.selenium.InvalidCookieDomainException:
+		driver.get(landURL);
+
+		driver.navigate().refresh();
+
+		if (debug) {
+			Set<Cookie> cookies = driver.manage().getCookies();
+			System.err.println("Cookies:");
+			JSONArray cookieJSONArray = new JSONArray();
+			for (Cookie cookie : cookies) {
+				System.err.println(
+						formatter.format("Name: '%s'\n", cookie.getName()).toString());
+				System.err.println(
+						formatter.format("Value: '%s'\n", cookie.getValue()).toString());
+				System.err.println(
+						formatter.format("Domain: '%s'\n", cookie.getDomain()).toString());
+				System.err.println(
+						formatter.format("Path: '%s'\n", cookie.getPath()).toString());
+				System.err.println(
+						formatter.format("Expiry: '%tc'\n", cookie.getExpiry()).toString());
+				System.err
+						.println(formatter.format("Secure: '%b'\n", cookie.isSecure()));
+				System.err
+						.println(formatter.format("HttpOnly: '%b'\n", cookie.isHttpOnly()));
+			}
+		}
+		// if (true) {
+		if (false) {
+			return;
+		}
+		sleep(120000);
 		// TODO: handle refreshes with Caution. As the 'Click Day' time approaches,
 		// reload the page continuously
 		// until the transmission button is active.
@@ -995,9 +1156,7 @@ public class ServiziCookieTest {
 		Map<String, String> collector = (parameters.isPresent()) ? parameters.get()
 				: new HashMap<>();
 
-		String data = (payload == null)
-				? "{ \"Url\": \"http://www.google.com\", \"ElementCodeName\": \"Name of the element\", \"CommandId\": \"d5be4ea9-c51f-4e61-aefc-e5c83ba00be8\", \"ElementCssSelector\": \"html div.home-logo_custom > img\", \"ElementId\": \"\", \"ElementXPath\": \"/html//img[1]\" }"
-				: payload;
+		String data = (payload == null) ? "{}" : payload;
 		try {
 			JSONObject elementObj = new JSONObject(data);
 			@SuppressWarnings("unchecked")
