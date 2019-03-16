@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import java.text.DecimalFormat;
 import java.lang.reflect.Method;
 
@@ -125,9 +126,10 @@ public class ServiziCookieTest {
 	private static Connection conn;
 	private static String sql;
 
-	private static final String extractQuery = "SELECT username, cookie FROM login_cookies where username = ?";
-	private static final String extractQueryTemplate = "SELECT username, cookie FROM login_cookies where username = '%s'";
-	private static final String insertQuery = "INSERT INTO login_cookies(username,cookie) VALUES(?,?)";
+	// NOTE: value data first column
+	private static final String extractQuery = "SELECT cookie, username, cookiename FROM login_cookies where username = ? and cookiename = ?";
+	private static final String extractQueryTemplate = "SELECT cookie, username, cookiename  FROM login_cookies where username = '%s'and cookiename = '%s'";
+	private static final String insertQuery = "INSERT INTO login_cookies(username, cookiename, cookie) VALUES(?,?,?)";
 	private static final String defaultKey = "name";
 
 	@SuppressWarnings("deprecation")
@@ -255,7 +257,7 @@ public class ServiziCookieTest {
 				System.err.println(
 						"Product version: " + databaseMetadata.getDatabaseProductVersion());
 				createNewTable();
-				// insertData("name", "dummy");
+				// insertData("name", "dummy", "cookie");
 				// conn.close();
 			}
 		} catch (ClassNotFoundException | SQLException ex) {
@@ -366,7 +368,7 @@ public class ServiziCookieTest {
 			*/
 			JSONObject cookieJSONObject = new JSONObject(cookie);
 			System.err.println("Insering: " + cookieJSONObject.toString());
-			insertData(usernome, cookieJSONObject.toString());
+			insertData(usernome, cookie.getName(), cookieJSONObject.toString());
 
 			cookieJSONArray.put(cookieJSONObject);
 		}
@@ -386,11 +388,13 @@ public class ServiziCookieTest {
 	@Test(enabled = true)
 	public void useCookieTest() throws Exception {
 		getCookieTest();
+		/*
 		System.err.println("Getting the cookies");
-		String cookieData = extractData(usernome);
+		String cookieData = extractData(usernome); // no longer enough
 		System.err.println("Got cookie: " + cookieData);
 		deserializeData(cookieData, Optional.of(cookieDataMap));
 		System.err.println(cookieDataMap);
+		*/
 		// NOTE: hack to trick compiler from unreachable statement to dead code
 		// if (true) {
 		if (false) {
@@ -581,6 +585,11 @@ public class ServiziCookieTest {
 					cookie.getDomain(), cookie.getPath(),
 					(java.util.Date) cookie.getExpiry(), (boolean) cookie.isSecure(),
 					(boolean) cookie.isHttpOnly());
+			String cookieData = extractData(usernome, cookie.getName()); // no longer
+																																		// enough
+			System.err.println("Got cookie: " + cookieData);
+			deserializeData(cookieData, Optional.of(cookieDataMap));
+			System.err.println(cookieDataMap);
 
 			cookieClone = new Cookie(cookieDataMap.get("name"),
 					cookieDataMap.get("value"), cookieDataMap.get("domain"),
@@ -854,7 +863,7 @@ public class ServiziCookieTest {
 		}
 		sql = "CREATE TABLE IF NOT EXISTS login_cookies (\n"
 				+ "	id integer PRIMARY KEY,\n" + "	username text NOT NULL,\n"
-				+ "	cookie text\n" + ");";
+				+ "	cookiename text NOT NULL,\n" + "	cookie text\n" + ");";
 		try (java.sql.Statement statement = conn.createStatement()) {
 			statement.execute(sql);
 		} catch (SQLException e) {
@@ -863,12 +872,15 @@ public class ServiziCookieTest {
 	}
 
 	// http://www.sqlitetutorial.net/sqlite-java/insert/
-	public static void insertData(String username, String jsonDataString) {
+	public static void insertData(String userName, String cookieName,
+			String jsonDataString) {
 		try (PreparedStatement _statement = conn.prepareStatement(insertQuery)) {
 			System.err.println("Prepare statement: " + insertQuery);
-			_statement.setString(1, username);
+			// NOTE: Values not bound to statement is not thrown as exception
+			_statement.setString(1, userName);
+			_statement.setString(2, cookieName);
 			// TODO: time stamp
-			_statement.setString(2, jsonDataString);
+			_statement.setString(3, jsonDataString);
 			_statement.executeUpdate();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -880,12 +892,12 @@ public class ServiziCookieTest {
 		ResultSet result = null;
 		try {
 			System.err.println(
-					String.format("Prepare statement: %s\nwith %s ", extractQuery, key));
-			PreparedStatement _statement = conn.prepareStatement(extractQuery);
-			_statement.setString(1, key);
-			result = _statement.executeQuery();
-		} catch (Exception e) {
-			System.err.println("Exception(ignored): " + e.toString());
+					String.format("Prepare statement: %s\nwith %s", extractQuery, key));
+			PreparedStatement statement = conn.prepareStatement(extractQuery);
+			statement.setString(1, key);
+			result = statement.executeQuery();
+		} catch (Exception e1) {
+			System.err.println("Exception(ignored): " + e1.toString());
 			// NOTE: there must be NO quotes around ? parameter in where or the
 			// following
 			// java.lang.ArrayIndexOutOfBoundsException:
@@ -894,8 +906,8 @@ public class ServiziCookieTest {
 			// see also extractQueryTemplate below
 			try {
 				System.err.println("Format statement query: " + extractQueryTemplate);
-				Statement _statement = conn.createStatement();
-				result = _statement
+				Statement statement = conn.createStatement();
+				result = statement
 						.executeQuery(String.format(extractQueryTemplate, key));
 			} catch (Exception e2) {
 				e2.printStackTrace();
@@ -907,9 +919,58 @@ public class ServiziCookieTest {
 			System.err.println("Got results:");
 			try {
 				while (result.next()) {
-					String usernameOut = result.getString(1);
-					String cookie = result.getString(2);
-					System.err.println("username: " + usernameOut);
+					String cookie = result.getString(1);
+					String username = result.getString(2);
+					String cookiename = result.getString(3);
+					System.err.println("username: " + username);
+					System.err.println("cookie:\n" + cookie);
+					value = cookie;
+				}
+			} catch (SQLException e) {
+				System.err.println("Exception(ignored): " + e.toString());
+			}
+		}
+		return value;
+	}
+
+	public static String extractData(String key1, String key2) {
+		String value = null;
+		ResultSet result = null;
+		try {
+			System.err.println(String.format("Prepare statement: %s\nwith %s,%s",
+					extractQuery, key1, key2));
+			PreparedStatement statement = conn.prepareStatement(extractQuery);
+			statement.setString(1, key1);
+			statement.setString(2, key2);
+			result = statement.executeQuery();
+		} catch (Exception e) {
+			System.err.println("Exception(ignored): " + e.toString());
+			// NOTE: there must be NO quotes around ? parameter in where or the
+			// following
+			// java.lang.ArrayIndexOutOfBoundsException:
+			// at org.sqlite.jdbc3.JDBC3PreparedStatement.setString
+			// TODO: pre-validate
+			// see also extractQueryTemplate below
+			try {
+				System.err.println("Format statement query: " + extractQueryTemplate);
+				Statement statement = conn.createStatement();
+				result = statement
+						.executeQuery(String.format(extractQueryTemplate, key1, key2));
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+
+		}
+
+		if (result != null) {
+			System.err.println("Got results:");
+			try {
+				while (result.next()) {
+					String cookie = result.getString(1);
+					String username = result.getString(2);
+					String cookiename = result.getString(3);
+					System.err.println("username: " + username);
+					System.err.println("cookiename: " + cookiename);
 					System.err.println("cookie:\n" + cookie);
 					value = cookie;
 				}
