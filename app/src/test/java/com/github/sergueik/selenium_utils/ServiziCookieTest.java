@@ -548,10 +548,19 @@ public class ServiziCookieTest {
 			System.err.println("Navigating to " + landURL);
 		}
 		driver.get(landURL);
-		sleep(10000);
+		sleep(1000); // pause
 		System.err.println("Loading cookies");
 		for (Cookie cookie : cookies) {
-			driver.manage().addCookie(cookie);
+			System.err.println("Loading cookie: " + cookie.getName());
+			// https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/Cookie.html
+			// Cookie(java.lang.String name, java.lang.String value, java.lang.String
+			// domain, java.lang.String path, java.util.Date expiry, boolean isSecure,
+			// boolean isHttpOnly)
+			Cookie cookieClone = new Cookie(cookie.getName(), cookie.getValue(),
+					cookie.getDomain(), cookie.getPath(),
+					(java.util.Date) cookie.getExpiry(), (boolean) cookie.isSecure(),
+					(boolean) cookie.isHttpOnly());
+			driver.manage().addCookie(cookieClone);
 		}
 		// org.openqa.selenium.InvalidCookieDomainException:
 		driver.navigate().refresh();
@@ -570,8 +579,19 @@ public class ServiziCookieTest {
 		*/
 		int cnt = 0;
 		while (cnt < 10) {
+			// pencil button
+			WebElement element = wait
+					.until(ExpectedConditions.visibilityOfElementLocated(
+							By.xpath("//*[contains(@id,'btnCompleta')][@title='Modifica']")));
+			System.err
+					.println("Pencil button:\n" + element.getAttribute("outerHTML"));
+			highlight(element);
+			element.click();
+			// navigates to 
+			// http://bandi.servizi.politicheagricole.it/taxcredit/moduloTCR.aspx?ID=331
 			List<WebElement> elements = driver
 					.findElements(By.xpath("//*[contains(@id,'msgClickDay')]"));
+
 			if (elements.size() > 0) {
 				System.err.println(elements.get(0).getText());
 				System.err.println("Waiting for F5 warning to disappear");
@@ -593,10 +613,6 @@ public class ServiziCookieTest {
 		} catch (TimeoutException | UnreachableBrowserException e) {
 			verificationErrors.append(e.toString());
 		}
-		/*
-		 //*[@id="ctl00_phContent_msgClickDay_lblMess"]/strong/text()[1]		
-		<span id="ctl00_phContent_msgClickDay_lblMess"><strong>Attenzione. All'approssimarsi dell'ora del 'Click Day' ricaricare continuamente la pagina fino a quando il pulsante di trasmissione non risulterà attivo.<br>Per aggiornare la pagina premere F5.</strong><br>NOTA: il tempo di riferimento 'Ora server' per l'invio delle domande verrà visualizzato in alto a destra nella barra del menu.</span>
-		 * */
 		sleep(120000);
 		doLogout();
 	}
@@ -856,7 +872,7 @@ public class ServiziCookieTest {
 		try {
 			Statement _statement = conn.createStatement();
 			ResultSet _result = _statement
-					.executeQuery(String.format(insertQueryTemplate, username));
+					.executeQuery(String.format(extractQueryTemplate, username));
 
 			System.err.println("Got results:");
 			while (_result.next()) {

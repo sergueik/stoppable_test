@@ -5,7 +5,7 @@
   <artifactId>coockie_collect_app_</artifactId>
   <packaging>jar</packaging>
   <description>This demonstrates the stoppable test usage for cookie collection in a simplified captcha-protected page</description>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <name>app</name>
   <url>http://maven.apache.org</url>
   <developers>
