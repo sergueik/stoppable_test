@@ -12,14 +12,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.lang.reflect.Method;
 
 import java.time.Duration;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Formatter;
 import java.util.logging.Level;
@@ -85,44 +88,51 @@ import org.testng.annotations.Test;
 
 public class ServiziCookieTest {
 
-	public int scriptTimeout = 5;
-	public int flexibleWait = 60; // too long
-	public int implicitWait = 1;
-	public int pollingInterval = 500;
-	private static long highlightInterval = 100;
 	private static final String usernome = getPropertyEnv("TEST_USER",
 			"testuser");
 	private static final String passe = getPropertyEnv("TEST_PASS", "00000000");
-	private static Formatter formatter;
-	private static StringBuilder loggingSb;
-
-	private static final boolean headless = Boolean
-			.parseBoolean(System.getenv("HEADLESS"));
-
-	private static final String baseURL = "http://bandi.servizi.politicheagricole.it/taxcredit/default.aspx";
-	private static final String landURL = "http://bandi.servizi.politicheagricole.it/taxcredit/menu.aspx";
 	private static String osName = getOSName();
+
+	private static final StringBuilder loggingSb = new StringBuilder();
+	private static final Formatter formatter = new Formatter(loggingSb,
+			Locale.US);
+
 	private static final StringBuffer verificationErrors = new StringBuffer();
+
+	private static final boolean debug = Boolean
+			.parseBoolean(System.getenv("DEBUG"));
+
 	public WebDriver driver;
 	public WebDriverWait wait;
 	public Actions actions;
 	public Alert alert;
 	public JavascriptExecutor js;
 	public TakesScreenshot screenshot;
+	public int scriptTimeout = 5;
+	public int flexibleWait = 60; // too long
+	public int implicitWait = 1;
+	public int pollingInterval = 500;
+	private static long highlightInterval = 100;
+	private static final boolean headless = Boolean
+			.parseBoolean(System.getenv("HEADLESS"));
+
+	private static final String baseURL = "http://bandi.servizi.politicheagricole.it/taxcredit/default.aspx";
+	private static final String landURL = "http://bandi.servizi.politicheagricole.it/taxcredit/menu.aspx";
+	private static final String detailURL = "http://bandi.servizi.politicheagricole.it/taxcredit/moduloTCR.aspx";
+
 	private static final String sqlite_database_name = "login_cookies";
 
 	private static Connection conn;
 	private static String sql;
+
 	private static final String extractQuery = "SELECT username, cookie FROM login_cookies where username = ?";
 	private static final String extractQueryTemplate = "SELECT username, cookie FROM login_cookies where username = '%s'";
 	private static final String insertQuery = "INSERT INTO login_cookies(username,cookie) VALUES(?,?)";
+	private static final String defaultKey = "name";
 
 	@SuppressWarnings("deprecation")
 	@BeforeClass
 	public void beforeClass() {
-
-		loggingSb = new StringBuilder();
-		formatter = new Formatter(loggingSb, Locale.US);
 
 		System.setProperty("webdriver.chrome.driver",
 				osName.equals("windows")
@@ -370,12 +380,23 @@ public class ServiziCookieTest {
 
 	}
 
+	private static Map<String, String> cookieDataMap = new HashMap<>();
+
 	@SuppressWarnings("deprecation")
 	@Test(enabled = true)
 	public void useCookieTest() throws Exception {
 		getCookieTest();
 		System.err.println("Getting the cookies");
-		System.err.println("Got cookie: " + readData(usernome));
+		String cookieData = extractData(usernome);
+		System.err.println("Got cookie: " + cookieData);
+		deserializeData(cookieData, Optional.of(cookieDataMap));
+		System.err.println(cookieDataMap);
+		// NOTE: hack to trick compiler from unreachable statement to dead code
+		// if (true) {
+		if (false) {
+			return;
+		}
+
 		// TODO: read cookie from the file
 		Set<Cookie> cookies = driver.manage().getCookies();
 		System.err.println("Closing the browser");
@@ -560,10 +581,20 @@ public class ServiziCookieTest {
 					cookie.getDomain(), cookie.getPath(),
 					(java.util.Date) cookie.getExpiry(), (boolean) cookie.isSecure(),
 					(boolean) cookie.isHttpOnly());
+
+			cookieClone = new Cookie(cookieDataMap.get("name"),
+					cookieDataMap.get("value"), cookieDataMap.get("domain"),
+					cookieDataMap.get("path"), (java.util.Date) null
+					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure")), Boolean.parseBoolean(cookieDataMap.get("httpOnly")));
+
 			driver.manage().addCookie(cookieClone);
 		}
 		// org.openqa.selenium.InvalidCookieDomainException:
 		driver.navigate().refresh();
+		// if (true) {
+		if (false) {
+			return;
+		}
 
 		// TODO: handle refreshes with Caution. As the 'Click Day' time approaches,
 		// reload the page continuously
@@ -587,7 +618,7 @@ public class ServiziCookieTest {
 					.println("Pencil button:\n" + element.getAttribute("outerHTML"));
 			highlight(element);
 			element.click();
-			// navigates to 
+			// navigates to
 			// http://bandi.servizi.politicheagricole.it/taxcredit/moduloTCR.aspx?ID=331
 			List<WebElement> elements = driver
 					.findElements(By.xpath("//*[contains(@id,'msgClickDay')]"));
@@ -844,47 +875,86 @@ public class ServiziCookieTest {
 		}
 	}
 
-	public static String readData(String username) {
+	public static String extractData(String key) {
 		String value = null;
+		ResultSet result = null;
 		try {
-			System.err.println("Prepare statement: " + extractQuery);
+			System.err.println(
+					String.format("Prepare statement: %s\nwith %s ", extractQuery, key));
 			PreparedStatement _statement = conn.prepareStatement(extractQuery);
-			_statement.setString(1, username);
-			ResultSet _result = _statement.executeQuery();
-			System.err.println("Got results:");
-			while (_result.next()) {
-				String usernameOut = _result.getString(1);
-				String jsonDataString = _result.getString(2);
-				System.err.println("username: " + usernameOut);
-				System.err.println("cookie:\n" + jsonDataString);
-				value = jsonDataString;
-			}
+			_statement.setString(1, key);
+			result = _statement.executeQuery();
 		} catch (Exception e) {
 			System.err.println("Exception(ignored): " + e.toString());
-			e.printStackTrace();
 			// NOTE: there must be NO quotes around ? parameter in where or the
 			// following
 			// java.lang.ArrayIndexOutOfBoundsException:
 			// at org.sqlite.jdbc3.JDBC3PreparedStatement.setString
 			// TODO: pre-validate
 			// see also extractQueryTemplate below
-		}
-		try {
-			Statement _statement = conn.createStatement();
-			ResultSet _result = _statement
-					.executeQuery(String.format(extractQueryTemplate, username));
-
-			System.err.println("Got results:");
-			while (_result.next()) {
-				String usernameOut = _result.getString(1);
-				String cookie = _result.getString(2);
-				System.err.println("username: " + usernameOut);
-				System.err.println("cookie:\n" + cookie);
-				value = cookie;
+			try {
+				System.err.println("Format statement query: " + extractQueryTemplate);
+				Statement _statement = conn.createStatement();
+				result = _statement
+						.executeQuery(String.format(extractQueryTemplate, key));
+			} catch (Exception e2) {
+				e2.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+
+		}
+
+		if (result != null) {
+			System.err.println("Got results:");
+			try {
+				while (result.next()) {
+					String usernameOut = result.getString(1);
+					String cookie = result.getString(2);
+					System.err.println("username: " + usernameOut);
+					System.err.println("cookie:\n" + cookie);
+					value = cookie;
+				}
+			} catch (SQLException e) {
+				System.err.println("Exception(ignored): " + e.toString());
+			}
 		}
 		return value;
+	}
+
+	public String deserializeData(Optional<Map<String, String>> parameters) {
+		return deserializeData(null, parameters);
+	}
+
+	// Deserialize the hashmap from the JSON
+	// see also
+	// https://stackoverflow.com/questions/3763937/gson-and-deserializing-an-array-of-objects-with-arrays-in-it
+	// https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
+	public String deserializeData(String payload,
+			Optional<Map<String, String>> parameters) {
+
+		Map<String, String> collector = (parameters.isPresent()) ? parameters.get()
+				: new HashMap<>();
+
+		String data = (payload == null)
+				? "{ \"Url\": \"http://www.google.com\", \"ElementCodeName\": \"Name of the element\", \"CommandId\": \"d5be4ea9-c51f-4e61-aefc-e5c83ba00be8\", \"ElementCssSelector\": \"html div.home-logo_custom > img\", \"ElementId\": \"\", \"ElementXPath\": \"/html//img[1]\" }"
+				: payload;
+		try {
+			JSONObject elementObj = new JSONObject(data);
+			@SuppressWarnings("unchecked")
+			Iterator<String> propIterator = elementObj.keys();
+			while (propIterator.hasNext()) {
+				String propertyKey = propIterator.next();
+				String propertyVal = elementObj.getString(propertyKey);
+				// logger.info(propertyKey + ": " + propertyVal);
+				if (debug) {
+					System.err
+							.println("Deserialize Data: " + propertyKey + ": " + propertyVal);
+				}
+				collector.put(propertyKey, propertyVal);
+			}
+		} catch (JSONException e) {
+			System.err.println("Exception (ignored): " + e.toString());
+			return null;
+		}
+		return collector.get(defaultKey);
 	}
 }
