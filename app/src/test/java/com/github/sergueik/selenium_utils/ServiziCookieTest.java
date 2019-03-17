@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.logging.Level;
 
@@ -310,7 +311,7 @@ public class ServiziCookieTest {
 		}
 	}
 
-	@Test(enabled = true)
+	@Test(enabled = false)
 	public void getCookieTest() {
 		driver.get(baseURL);
 		WebElement element = driver
@@ -382,7 +383,7 @@ public class ServiziCookieTest {
 		/// onclick="javascript:__doPostBack('ctl00$phContent$Login$btnCaptcha','')"
 		final Display display = new Display();
 		final Shell shell = new Shell(display);
-		
+
 		System.err.println("Hold the test");
 		System.err.println("Creating new dialog on the display");
 		BlockTestDialogEx blockTestDialog = new BlockTestDialogEx(shell);
@@ -709,10 +710,10 @@ public class ServiziCookieTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void pureCookieTest() throws Exception {
-		driver.get(baseURL);
 
+		driver.get(baseURL);
 		System.err.println("Loading cookies: " + cookieNames);
 
 		for (String cookieName : cookieNames) {
@@ -728,9 +729,13 @@ public class ServiziCookieTest {
 			deserializeData(cookieData, Optional.of(cookieDataMap));
 			System.err.println(cookieDataMap);
 
+			Date now = new Date();
+			long t = now.getTime();
+			t += 7 * 24 * 60 * 60 * 1000;
+			Date then = new Date(t);
 			Cookie cookie = new Cookie(cookieDataMap.get("name"),
 					cookieDataMap.get("value"), cookieDataMap.get("domain"),
-					cookieDataMap.get("path"), (java.util.Date) null
+					cookieDataMap.get("path"), (java.util.Date) then
 					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure")), Boolean.parseBoolean(cookieDataMap.get("httpOnly")));
 
 			driver.manage().addCookie(cookie);
