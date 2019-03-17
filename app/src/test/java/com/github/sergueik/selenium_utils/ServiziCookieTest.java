@@ -62,12 +62,9 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
@@ -134,8 +131,8 @@ public class ServiziCookieTest {
 	private static String sql;
 
 	// NOTE: value data first column
-	private static final String extractQuery = "SELECT cookie, username, cookiename FROM login_cookies where username = ? and cookiename = ?";
-	private static final String extractQueryTemplate = "SELECT cookie, username, cookiename  FROM login_cookies where username = '%s'and cookiename = '%s'";
+	private static final String extractQuery = "SELECT cookie, username, cookiename FROM login_cookies where username = ? and cookiename = ? limit 1";
+	private static final String extractQueryTemplate = "SELECT cookie, username, cookiename  FROM login_cookies where username = '%s'and cookiename = '%s' limit 1";
 	private static final String insertQuery = "INSERT INTO login_cookies(username, cookiename, cookie) VALUES(?,?,?)";
 	private static final String defaultKey = "name";
 	List<String> cookieNames = new ArrayList<>(
@@ -332,10 +329,6 @@ public class ServiziCookieTest {
 		element = driver.findElement(By.id("btnRobot"));
 		String arithCaptcha = element.getText();
 		System.err.println("Non sono un robot: " + arithCaptcha);
-		// 17 pi∙ 69 =
-		// 8 per 6 =
-		// 49 meno 48 =
-		// 30 divizo 5 =
 
 		Pattern pattern = Pattern
 				.compile("(\\d+)\\s+((?:per|divizo|meno|pi.))\\s+(\\d+)\\s*=\\s*");
@@ -444,19 +437,17 @@ public class ServiziCookieTest {
 
 	}
 
-	private static Map<String, String> cookieDataMap = new HashMap<>();
+	private static Map<String, Object> cookieDataMap = new HashMap<>();
 
 	@SuppressWarnings("deprecation")
 	@Test(enabled = false)
 	public void useCookieTest() throws Exception {
 		getCookieTest();
 		// NOTE: hack to trick compiler from unreachable statement to dead code
-		// if (true) {
-		if (false) {
+		/* if (true) {
 			return;
 		}
-
-		// TODO: read cookie from the file
+		*/
 		Set<Cookie> cookies = driver.manage().getCookies();
 		System.err.println("Closing the browser");
 		wait = null;
@@ -519,11 +510,9 @@ public class ServiziCookieTest {
 				"--browser.helperApps.neverAsk.saveToDisk=image/jpg,text/csv,text/xml,application/xml,application/vnd.ms-excel,application/x-excel,application/x-msexcel,application/excel,application/pdf",
 				String.format("--browser.download.dir=%s", downloadFilepath)
 				/* "--user-data-dir=/path/to/your/custom/profile"  , */
-
 		})) {
 			chromeOptions.addArguments(optionAgrument);
 		}
-
 		// options for headless
 		if (headless) {
 			for (String optionAgrument : (new String[] { "headless",
@@ -553,80 +542,6 @@ public class ServiziCookieTest {
 
 		// driver.setLogLevel(Level.ALL);
 		wait = new WebDriverWait(driver, flexibleWait);
-
-		if (false) {
-			System.setProperty("webdriver.gecko.driver",
-					osName.equals("windows")
-							? (new File("c:/java/selenium/geckodriver.exe")).getAbsolutePath()
-							: Paths.get(System.getProperty("user.home")).resolve("Downloads")
-									.resolve("geckodriver").toAbsolutePath().toString());
-			/* DesiredCapabilities */ capabilities = DesiredCapabilities.firefox();
-			// use legacy FirefoxDriver
-			// for Firefox v.59 no longer possible ?
-			capabilities.setCapability("marionette", false);
-			// http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.firefox.FirefoxProfile
-			capabilities.setCapability("locationContextEnabled", false);
-			capabilities.setCapability("acceptSslCerts", true);
-			capabilities.setCapability("elementScrollBehavior", 1);
-			FirefoxProfile profile = new FirefoxProfile();
-			// NOTE: the setting below may be too restrictive
-			// http://kb.mozillazine.org/Network.cookie.cookieBehavior
-			// profile.setPreference("network.cookie.cookieBehavior", 2);
-			// no cookies are allowed
-			profile.setPreference("browser.helperApps.neverAsk.saveToDisk",
-					"application/octet-stream,text/csv");
-			profile.setPreference("browser.helperApps.neverAsk.openFile",
-					"text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml");
-			// TODO: cannot find symbol: method
-			// addPreference(java.lang.String,java.lang.String)location: variable
-			// profile of type org.openqa.selenium.firefox.FirefoxProfile
-			profile.setPreference("browser.helperApps.neverAsk.saveToDisk",
-					"text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml");
-			profile.setPreference("browser.helperApps.alwaysAsk.force", false);
-			profile.setPreference("browser.download.manager.alertOnEXEOpen", false);
-			profile.setAcceptUntrustedCertificates(true);
-			profile.setAssumeUntrustedCertificateIssuer(true);
-
-			// NOTE: ERROR StatusLogger No log4j2 configuration file found. Using
-			// default configuration: logging only errors to the console.
-			/* LoggingPreferences */ logPrefs = new LoggingPreferences();
-			logPrefs.enable(LogType.PERFORMANCE, Level.INFO);
-			logPrefs.enable(LogType.PROFILER, Level.INFO);
-			logPrefs.enable(LogType.BROWSER, Level.INFO);
-			logPrefs.enable(LogType.CLIENT, Level.INFO);
-			logPrefs.enable(LogType.DRIVER, Level.INFO);
-			logPrefs.enable(LogType.SERVER, Level.INFO);
-			capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
-			profile.setPreference("webdriver.firefox.logfile", "/dev/null");
-			// NOTE: the next setting appears to have no effect.
-			// does one really need os-specific definition?
-			// like /dev/null for Linux vs. nul for Windows
-			System.setProperty("webdriver.firefox.logfile",
-					osName.equals("windows") ? "nul" : "/dev/null");
-
-			// no longer supported as of Selenium 3.8.x
-			// profile.setEnableNativeEvents(false);
-			profile.setPreference("dom.webnotifications.enabled", false);
-			// optional
-			// System.err.println(System.getProperty("user.dir"));
-			capabilities.setCapability(FirefoxDriver.PROFILE, profile);
-			try {
-				driver = new FirefoxDriver(capabilities);
-			} catch (WebDriverException e) {
-				e.printStackTrace();
-				throw new RuntimeException(
-						"Cannot initialize Firefox driver: " + e.toString());
-			}
-			// re-initialize wait object
-			wait = new WebDriverWait(driver, flexibleWait);
-
-			// Selenium Driver version sensitive code: 3.13.0 vs. 3.8.0 and older
-			// java has no precompiler #ifdef
-			// wait.pollingEvery(Duration.ofMillis(pollingInterval));
-			wait.pollingEvery(pollingInterval, TimeUnit.MILLISECONDS);
-			System.err.println("Navigating to " + landURL);
-		}
 		driver.get(landURL);
 		sleep(1000); // pause
 		System.err.println("Loading cookies");
@@ -643,10 +558,11 @@ public class ServiziCookieTest {
 			deserializeData(cookieData, Optional.of(cookieDataMap));
 			System.err.println(cookieDataMap);
 
-			cookieClone = new Cookie(cookieDataMap.get("name"),
-					cookieDataMap.get("value"), cookieDataMap.get("domain"),
-					cookieDataMap.get("path"), (java.util.Date) null
-					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure")), Boolean.parseBoolean(cookieDataMap.get("httpOnly")));
+			cookieClone = new Cookie(cookieDataMap.get("name").toString(),
+					cookieDataMap.get("value").toString(),
+					cookieDataMap.get("domain").toString(),
+					cookieDataMap.get("path").toString(), (java.util.Date) null
+					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure").toString()), Boolean.parseBoolean(cookieDataMap.get("httpOnly").toString()));
 
 			driver.manage().addCookie(cookieClone);
 		}
@@ -709,34 +625,32 @@ public class ServiziCookieTest {
 		doLogout();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test(enabled = true)
 	public void pureCookieTest() throws Exception {
 
 		driver.get(baseURL);
-		System.err.println("Loading cookies: " + cookieNames);
+		System.err.println("Generating cookies: " + cookieNames);
 
 		for (String cookieName : cookieNames) {
 
-			System.err.println("Loading cookie: " + cookieName);
-			// https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/Cookie.html
-			// Cookie(java.lang.String name, java.lang.String value, java.lang.String
-			// domain, java.lang.String path, java.util.Date expiry, boolean isSecure,
-			// boolean isHttpOnly)
-
 			String cookieData = extractData(usernome, cookieName);
-			System.err.println("Got cookie: " + cookieData);
 			deserializeData(cookieData, Optional.of(cookieDataMap));
-			System.err.println(cookieDataMap);
 
 			Date now = new Date();
 			long t = now.getTime();
 			t += 7 * 24 * 60 * 60 * 1000;
-			Date then = new Date(t);
-			Cookie cookie = new Cookie(cookieDataMap.get("name"),
-					cookieDataMap.get("value"), cookieDataMap.get("domain"),
-					cookieDataMap.get("path"), (java.util.Date) then
-					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure")), Boolean.parseBoolean(cookieDataMap.get("httpOnly")));
+			Date futureDate = new Date(t);
+
+			cookieDataMap.put("expiry", futureDate);
+			System.err
+					.println("Constructing cookie: " + cookieName + "\n" + cookieDataMap);
+
+			Cookie cookie = new Cookie(cookieDataMap.get("name").toString(),
+					cookieDataMap.get("value").toString(),
+					cookieDataMap.get("domain").toString(),
+					cookieDataMap.get("path").toString(),
+					(java.util.Date) cookieDataMap.get("expiry")
+					/* TODO: (java.util.Date) cookieDataMap.get("expiry") */, Boolean.parseBoolean(cookieDataMap.get("secure").toString()), Boolean.parseBoolean(cookieDataMap.get("httpOnly").toString()));
 
 			driver.manage().addCookie(cookie);
 		}
@@ -747,28 +661,16 @@ public class ServiziCookieTest {
 
 		if (debug) {
 			Set<Cookie> cookies = driver.manage().getCookies();
-			System.err.println("Cookies:");
-			JSONArray cookieJSONArray = new JSONArray();
 			for (Cookie cookie : cookies) {
-				System.err.println(
-						formatter.format("Name: '%s'\n", cookie.getName()).toString());
-				System.err.println(
-						formatter.format("Value: '%s'\n", cookie.getValue()).toString());
-				System.err.println(
-						formatter.format("Domain: '%s'\n", cookie.getDomain()).toString());
-				System.err.println(
-						formatter.format("Path: '%s'\n", cookie.getPath()).toString());
-				System.err.println(
-						formatter.format("Expiry: '%tc'\n", cookie.getExpiry()).toString());
-				System.err
-						.println(formatter.format("Secure: '%b'\n", cookie.isSecure()));
-				System.err
-						.println(formatter.format("HttpOnly: '%b'\n", cookie.isHttpOnly()));
+				System.err.println(formatter.format("Name: '%s'\n", cookie.getName())
+						.toString()
+						+ formatter.format("Value: '%s'\n", cookie.getValue()).toString()
+						+ formatter.format("Domain: '%s'\n", cookie.getDomain()).toString()
+						+ formatter.format("Path: '%s'\n", cookie.getPath()).toString()
+						+ formatter.format("Expiry: '%tc'\n", cookie.getExpiry()).toString()
+						+ formatter.format("Secure: '%b'\n", cookie.isSecure())
+						+ formatter.format("HttpOnly: '%b'\n", cookie.isHttpOnly()));
 			}
-		}
-		// if (true) {
-		if (false) {
-			return;
 		}
 		sleep(120000);
 		// TODO: handle refreshes with Caution. As the 'Click Day' time approaches,
@@ -1147,7 +1049,7 @@ public class ServiziCookieTest {
 		return value;
 	}
 
-	public String deserializeData(Optional<Map<String, String>> parameters) {
+	public String deserializeData(Optional<Map<String, Object>> parameters) {
 		return deserializeData(null, parameters);
 	}
 
@@ -1156,9 +1058,9 @@ public class ServiziCookieTest {
 	// https://stackoverflow.com/questions/3763937/gson-and-deserializing-an-array-of-objects-with-arrays-in-it
 	// https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
 	public String deserializeData(String payload,
-			Optional<Map<String, String>> parameters) {
+			Optional<Map<String, Object>> parameters) {
 
-		Map<String, String> collector = (parameters.isPresent()) ? parameters.get()
+		Map<String, Object> collector = (parameters.isPresent()) ? parameters.get()
 				: new HashMap<>();
 
 		String data = (payload == null) ? "{}" : payload;
@@ -1180,6 +1082,6 @@ public class ServiziCookieTest {
 			System.err.println("Exception (ignored): " + e.toString());
 			return null;
 		}
-		return collector.get(defaultKey);
+		return collector.get(defaultKey).toString();
 	}
 }
