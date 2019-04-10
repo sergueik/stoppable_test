@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 // import javax.swing.JLabel;
+import javax.swing.Timer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,7 +29,12 @@ import javax.swing.WindowConstants;
 @SuppressWarnings("serial")
 public class TestDialog extends JFrame {
 
-	private String callerText = null;
+	private boolean closeOnTimeout = false;
+	private Timer timer;
+	private int interval = 60;
+	private int count = 10;
+
+	private String callerText = "";
 	private final boolean debug = false;
 	private final int width = 400;
 	private final int height = 250;
@@ -73,30 +79,79 @@ public class TestDialog extends JFrame {
 				dispose();
 			}
 		});
+		if (closeOnTimeout) {
+			timer = new Timer(interval * 1000, e -> {
+				if (count > 0) {
+					System.err.println(String.format("Auto-close in %d min", count));
+					continueButton.setVisible(false);
+					continueButton.setText(
+							String.format("Auto-close in %s min", String.valueOf(count--)));
+					continueButton.doLayout();
+					continueButton.setVisible(true);
+				} else {
+					((Timer) (e.getSource())).stop();
+					/*
+					continueButton.setVisible(false);
+					continueButton.setText("Click me");
+					continueButton.doLayout();
+					continueButton.setVisible(true);
+					continueButton.setEnabled(true);
+					*/
+					if (debug) {
+						System.err
+								.println("Automatically closing dialog " + " - timer expired");
+					}
+					jDialog.dispose();
+					jDialog.setVisible(false);
+					setVisible(false);
+					if (debug) {
+						System.err.println("Closed the dialog.");
+					}
+					dispose();
+
+				}
+			});
+			timer.setInitialDelay(0);
+		}
 		jDialog.getContentPane().add(continueButton, BorderLayout.SOUTH);
 		jDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		jDialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(borderWidth,
 				borderWidth, borderWidth, borderWidth));
 		jDialog.pack();
-		// TODO: timer
-		setSize(width, height);
-		jDialog.setVisible(true);
 
+		setSize(width, height);
+		if (closeOnTimeout) {
+			timer.start();
+		}
+		jDialog.setVisible(true);
 	}
 
-	public TestDialog(String text) {
-		this.callerText = text;
+	public TestDialog(String callerText) {
+		this.callerText = callerText;
+		paintTestDialog();
+	}
+
+	public TestDialog(String callerText,
+			boolean closeOnTimeout) {
+		this.callerText = callerText;
+		this.closeOnTimeout = closeOnTimeout;
+		paintTestDialog();
+	}
+
+	public TestDialog(String callerText, boolean closeOnTimeout,
+			int count) {
+		this.callerText = callerText;
+		this.closeOnTimeout = closeOnTimeout;
+		this.count = count;
 		paintTestDialog();
 	}
 
 	public TestDialog() {
-		this.callerText = "unknown";
 		paintTestDialog();
-
 	}
 
 	public static void main(String[] args) {
-		new TestDialog();
+		new TestDialog("main");
 	}
 
 	private static class OwnDrawnBoxIcon implements Icon {

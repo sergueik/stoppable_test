@@ -191,7 +191,7 @@ public class StoppableTest {
 	}
 
 	@Test(enabled = true)
-	public void test1() {
+	public void exampleTest() {
 		// String handle = createWindow(altURL);
 		String name = "Window_" + instanceCount++;
 		// inject an anchor element - will likely appear at the bottom of the page
@@ -203,7 +203,8 @@ public class StoppableTest {
 		// stop the test until user chooses to continue
 		System.err
 				.println("Hold the test: creating new Swing dialog on the display");
-		new TestDialog();
+		// new TestDialog();
+		new TestDialog("exampleTest", true, 2);
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
