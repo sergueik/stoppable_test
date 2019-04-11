@@ -1,34 +1,15 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Paths;
-
 import java.lang.reflect.Method;
-
-import java.time.Duration;
-
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import java.util.concurrent.TimeUnit;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IconAndMessageDialog;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -46,9 +27,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import org.testng.ITestResult;
-
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
@@ -113,7 +92,7 @@ public class StoppableTest {
 
 		chromeOptions.setExperimentalOption("prefs", chromePrefs);
 		if (osName.equals("windows")) {
-			// TODO: find out the CPU arch using jni 
+			// TODO: find out the CPU arch using jni
 			if (System.getProperty("os.arch").contains("64")) {
 				String[] paths = new String[] {
 						"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
@@ -181,8 +160,8 @@ public class StoppableTest {
 		wait = new WebDriverWait(driver, flexibleWait);
 
 		// Selenium Driver version sensitive code: 3.13.0 vs. 3.8.0 and older
-// java has no precompiler #ifdef 
-//		wait.pollingEvery(Duration.ofMillis(pollingInterval));
+		// java has no precompiler #ifdef
+		// wait.pollingEvery(Duration.ofMillis(pollingInterval));
 		wait.pollingEvery(pollingInterval, TimeUnit.MILLISECONDS);
 
 		screenshot = ((TakesScreenshot) driver);
@@ -231,9 +210,8 @@ public class StoppableTest {
 
 		System.err.println("Hold the test");
 		System.err.println("Creating new dialog on the display");
-		BlockTestDialogEx blockTestDialog = new BlockTestDialogEx(shell);
-		blockTestDialog.setMessage(
-				"This is Selenium test supplied message...");
+		TestDialog blockTestDialog = new TestDialog(shell);
+		blockTestDialog.setMessage("This is Selenium test supplied message...");
 		blockTestDialog.setButtonText("Continue test");
 		blockTestDialog.setContinueText("Continue the test");
 		blockTestDialog.open();
@@ -312,78 +290,4 @@ public class StoppableTest {
 		}
 	}
 
-	private static class BlockTestDialogEx extends IconAndMessageDialog {
-
-		public static final int CONTINUE_ID = IDialogConstants.CLIENT_ID;
-		public static final String CONTINUE_LABEL = "Continue";
-		private Image image;
-		private Label label;
-		private String buttonText = "Continue";
-		private String continueText = null;
-
-		private String message = "Press button to continue Selenium test";
-
-		public BlockTestDialogEx(Shell parent) {
-			super(parent);
-
-			try {
-				image = new Image(parent.getDisplay(),
-						new FileInputStream("src/main/resources/images/watchglass.png"));
-			} catch (FileNotFoundException e) {
-				System.err.println("Exception: " + e.toString());
-			}
-		}
-
-		public void setMessage(String data) {
-			this.message = data;
-		}
-
-		public void setButtonText(String data) {
-			this.buttonText = data;
-		}
-
-		public void setContinueText(String data) {
-			this.continueText = data;
-		}
-
-		public boolean close() {
-			if (image != null)
-				image.dispose();
-			return super.close();
-		}
-
-		protected Control createDialogArea(Composite parent) {
-			createMessageArea(parent);
-
-			Composite composite = new Composite(parent, SWT.NONE);
-			GridData data = new GridData(GridData.FILL_BOTH);
-			data.horizontalSpan = 2;
-			composite.setLayoutData(data);
-			composite.setLayout(new FillLayout());
-
-			label = new Label(composite, SWT.LEFT);
-			label.setText(message);
-
-			return composite;
-		}
-
-		protected void createButtonsForButtonBar(Composite parent) {
-			Button button = createButton(parent, CONTINUE_ID, CONTINUE_LABEL, false);
-			button.setText(buttonText);
-		}
-
-		protected void buttonPressed(int buttonId) {
-			if (buttonId == CONTINUE_ID) {
-				setReturnCode(buttonId);
-				if (continueText != null) {
-					System.err.println(continueText);
-				}
-				close();
-			}
-		}
-
-		protected Image getImage() {
-			return image;
-		}
-	}
 }
