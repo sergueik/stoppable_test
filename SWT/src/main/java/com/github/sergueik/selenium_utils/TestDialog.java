@@ -26,7 +26,7 @@ public class TestDialog extends IconAndMessageDialog {
 	public static final String CONTINUE_LABEL = "Continue";
 	private Image image;
 	private Label label;
-	private String buttonText = "Continue";
+	private String buttonText = "Press button to continue test";
 	private String continueText = null;
 	public Button button;
 
@@ -70,7 +70,7 @@ public class TestDialog extends IconAndMessageDialog {
 
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		data.horizontalSpan = 2;
+		data.horizontalSpan = 	1;
 		composite.setLayoutData(data);
 		composite.setLayout(new FillLayout());
 
@@ -84,6 +84,7 @@ public class TestDialog extends IconAndMessageDialog {
 
 		button = createButton(parent, CONTINUE_ID, CONTINUE_LABEL, false);
 		button.setText(buttonText);
+		button.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 		getTask2(button, maxCount).start();
 
 	}
@@ -110,7 +111,8 @@ public class TestDialog extends IconAndMessageDialog {
 					}
 					display.asyncExec(new Runnable() {
 						public void run() {
-							_button.setText("done:  " + count);
+							_button.setText(
+									"Autoresumt in " + (maxcount - count) + " min");
 						}
 					});
 				}
@@ -137,11 +139,8 @@ public class TestDialog extends IconAndMessageDialog {
 		TestDialog blockTestDialog = new TestDialog(shell);
 		blockTestDialog.setMessage(message);
 		blockTestDialog.setMaxCount(maxCount);
-		blockTestDialog.setButtonText("Continue test");
+		blockTestDialog.setButtonText("Press button to continue test");
 		blockTestDialog.setContinueText("Continue the test");
 		blockTestDialog.open();
-
-		// timer
-		// close();
 	}
 }
