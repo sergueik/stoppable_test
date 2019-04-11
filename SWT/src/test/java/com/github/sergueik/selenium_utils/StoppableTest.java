@@ -203,8 +203,8 @@ public class StoppableTest {
 		// scroll to the new page element
 		scroll(element);
 		// stop the test until user chooses to continue
-		// TODO: extract class method
-		TestDialog.show("This is Selenium test supplied message...", true, 10);
+		TestDialog.show("This is Selenium test supplied message...", false, 10);
+		// TestDialog.show("This is Selenium test supplied message...", true, 10);
 		// continue the test
 		element.click();
 		sleep(5000);
