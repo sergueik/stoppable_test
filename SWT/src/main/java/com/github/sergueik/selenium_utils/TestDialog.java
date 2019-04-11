@@ -21,14 +21,15 @@ public class TestDialog extends IconAndMessageDialog {
 
 	private static Display display = new Display();
 	private static Shell shell;
-	public static int maxCount = 10;
-	public static final int CONTINUE_ID = IDialogConstants.CLIENT_ID;
-	public static final String CONTINUE_LABEL = "Continue";
 	private Image image;
 	private Label label;
+	public Button button;
+	public static final int CONTINUE_ID = IDialogConstants.CLIENT_ID;
+	public static final String CONTINUE_LABEL = "Continue";
 	private String buttonText = "Press button to continue test";
 	private String continueText = null;
-	public Button button;
+	private boolean closeOnTimeout = false;
+	public static int maxCount = 10;
 
 	private String message = "Press button to continue Selenium test";
 
@@ -45,6 +46,10 @@ public class TestDialog extends IconAndMessageDialog {
 
 	public void setMessage(String data) {
 		this.message = data;
+	}
+
+	public void setCloseOnTimeout(boolean data) {
+		this.closeOnTimeout = data;
 	}
 
 	public void setMaxCount(int data) {
@@ -70,7 +75,7 @@ public class TestDialog extends IconAndMessageDialog {
 
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		data.horizontalSpan = 	1;
+		data.horizontalSpan = 1;
 		composite.setLayoutData(data);
 		composite.setLayout(new FillLayout());
 
@@ -85,7 +90,10 @@ public class TestDialog extends IconAndMessageDialog {
 		button = createButton(parent, CONTINUE_ID, CONTINUE_LABEL, false);
 		button.setText(buttonText);
 		button.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		getTask2(button, maxCount).start();
+
+		if (closeOnTimeout) {
+			getTask2(button, maxCount).start();
+		}
 
 	}
 
@@ -111,8 +119,11 @@ public class TestDialog extends IconAndMessageDialog {
 					}
 					display.asyncExec(new Runnable() {
 						public void run() {
-							_button.setText(
-									"Autoresumt in " + (maxcount - count) + " min");
+							_button.setVisible(false);
+							_button.setText("Autoresubmit in " + (maxcount - count) + " min");
+							_button.setLayoutData(
+									new GridData(SWT.CENTER, SWT.CENTER, false, false));
+							_button.setVisible(true);
 						}
 					});
 				}
@@ -124,6 +135,7 @@ public class TestDialog extends IconAndMessageDialog {
 				});
 
 			}
+
 		};
 	}
 
@@ -131,13 +143,15 @@ public class TestDialog extends IconAndMessageDialog {
 		return image;
 	}
 
-	public static void show(String message, int maxCount) {
+	public static void show(String message, boolean closeOnTimeout,
+			int maxCount) {
 
 		shell = new Shell(display);
 		System.err.println("Hold the test");
 		System.err.println("Creating new dialog on the display");
 		TestDialog blockTestDialog = new TestDialog(shell);
 		blockTestDialog.setMessage(message);
+		blockTestDialog.setCloseOnTimeout(closeOnTimeout);
 		blockTestDialog.setMaxCount(maxCount);
 		blockTestDialog.setButtonText("Press button to continue test");
 		blockTestDialog.setContinueText("Continue the test");
