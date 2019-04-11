@@ -5,7 +5,7 @@
   <artifactId>stoppable_test_swt</artifactId>
   <packaging>jar</packaging>
   <description>This demonstrates launching GUI dialog to pause the Selenium test until the 'Continue' button is pressed (based on Eclipse SWT)</description>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.6-SNAPSHOT</version>
   <name>app</name>
   <url>http://maven.apache.org</url>
   <developers>

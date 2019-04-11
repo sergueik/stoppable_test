@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -205,17 +203,8 @@ public class StoppableTest {
 		// scroll to the new page element
 		scroll(element);
 		// stop the test until user chooses to continue
-		final Display display = new Display();
-		final Shell shell = new Shell(display);
-
-		System.err.println("Hold the test");
-		System.err.println("Creating new dialog on the display");
-		TestDialog blockTestDialog = new TestDialog(shell);
-		blockTestDialog.setMessage("This is Selenium test supplied message...");
-		blockTestDialog.setButtonText("Continue test");
-		blockTestDialog.setContinueText("Continue the test");
-		blockTestDialog.open();
-
+		// TODO: extract class method
+		TestDialog.show("This is Selenium test supplied message...", 10);
 		// continue the test
 		element.click();
 		sleep(5000);
