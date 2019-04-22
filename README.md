@@ -25,9 +25,32 @@ The examples in this directory borrows one of the test scenarios from another re
 
 Using Java for stop dialog guarantees platform independnce,
 at a low cost that a different set of jars need to be used for Mac OSX, Linux and Windows (32 or 64 bit) for SWT.
-This is easily solvable through property activated profiles, but may become a little of a challenge if the test suite itself needs maven profiles for some other purpose. The JavaFx and Swing versions have no such platformr-specific jar dependencies.
+This is easily solvable through property activated profiles, but may become a little of a challenge if the test suite itself needs maven profiles for some other purpose. 
+The JavaFx and Swing versions have no such platformr-specific jar dependencies.
 
 ![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swing.png)
+
+### Note
+
+On older mac / hackintosh platforms one need to pick the ChromeDriver version matching whatever Chrome version browser would be installed, in paricular
+Google Chrome build 49.0.2623.112
+for mac is a 32-bit app and requires a 32 bit chromdriver build 22  to even work.
+The supported versions are always listed in the `notes.txt` e.g.
+```sh
+https://chromedriver.storage.googleapis.com/2.22/notes.txt
+```
+
+Using the correct combination allows driver to at least make the browser visible on the desktop but may still fail to navigate anywhere
+from the starting page `data:,` and test eventually timing out (one can add assertions).
+
+Using a mismatched combination is likely lead to the exception
+```java
+org.openqa.selenium.WebDriverException:
+Timed out waiting for driver server to start.
+```
+No such problem with (also old) build of Firefox and the geckodriver
+![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swing_hackintosh.png)
+
 
 ### See Also
   * [Eclipse Standard Widget Toolkit](https://www.eclipse.org/swt/)

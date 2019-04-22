@@ -15,9 +15,12 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
@@ -66,92 +69,84 @@ public class StoppableTest {
 
 		System.setProperty("webdriver.chrome.driver",
 				osName.equals("windows")
-						? (new File("c:/java/selenium/chromedriver.exe")).getAbsolutePath()
+						? (new File("c:/java/selenium/geckodriver.exe")).getAbsolutePath()
 						: Paths.get(System.getProperty("user.home")).resolve("Downloads")
-								.resolve("chromedriver").toAbsolutePath().toString());
+								.resolve("geckodriver").toAbsolutePath().toString());
 
-		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-		ChromeOptions chromeOptions = new ChromeOptions();
-
-		Map<String, Object> chromePrefs = new HashMap<>();
-		chromePrefs.put("profile.default_content_settings.popups", 0);
-		String downloadFilepath = System.getProperty("user.dir")
-				+ System.getProperty("file.separator") + "target"
-				+ System.getProperty("file.separator");
-		chromePrefs.put("download.prompt_for_download", "false");
-		chromePrefs.put("download.directory_upgrade", "true");
-		chromePrefs.put("plugins.always_open_pdf_externally", "true");
-		chromePrefs.put("download.default_directory", downloadFilepath);
-		chromePrefs.put("enableNetwork", "true");
-		// https://stackoverflow.com/questions/18106588/how-to-disable-cookies-using-webdriver-for-chrome-and-firefox-java
-		// chromePrefs.put("profile.default_content_settings.cookies", 2);
+		/*
+			System
+					.setProperty("webdriver.firefox.bin",
+							osName.equals("windows") ? new File(
+									"c:/Program Files (x86)/Mozilla Firefox/firefox.exe")
+											.getAbsolutePath()
+									: "/usr/bin/firefox");
+		
+		 */
+		// https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
+		DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+		// use legacy FirefoxDriver
+		// for Firefox v.59 no longer possible ?
+		capabilities.setCapability("marionette", false);
+		// http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.firefox.FirefoxProfile
+		capabilities.setCapability("locationContextEnabled", false);
+		capabilities.setCapability("acceptSslCerts", true);
+		capabilities.setCapability("elementScrollBehavior", 1);
+		FirefoxProfile profile = new FirefoxProfile();
+		// NOTE: the setting below may be too restrictive
+		// http://kb.mozillazine.org/Network.cookie.cookieBehavior
+		// profile.setPreference("network.cookie.cookieBehavior", 2);
 		// no cookies are allowed
+		profile.setPreference("browser.helperApps.neverAsk.saveToDisk",
+				"application/octet-stream,text/csv");
+		profile.setPreference("browser.helperApps.neverAsk.openFile",
+				"text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml");
+		// TODO: cannot find symbol: method
+		// addPreference(java.lang.String,java.lang.String)location: variable
+		// profile of type org.openqa.selenium.firefox.FirefoxProfile
+		profile.setPreference("browser.helperApps.neverAsk.saveToDisk",
+				"text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml");
+		profile.setPreference("browser.helperApps.alwaysAsk.force", false);
+		profile.setPreference("browser.download.manager.alertOnEXEOpen", false);
+		// http://learn-automation.com/handle-untrusted-certificate-selenium/
+		profile.setAcceptUntrustedCertificates(true);
+		profile.setAssumeUntrustedCertificateIssuer(true);
 
-		chromeOptions.setExperimentalOption("prefs", chromePrefs);
-		if (osName.equals("windows")) {
-			// TODO: use jni to find out the CPU arch
-			if (System.getProperty("os.arch").contains("64")) {
-				String[] paths = new String[] {
-						"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-						"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" };
-				// check file existence
-				for (String path : paths) {
-					File exe = new File(path);
-					System.err.println("Inspecting browser path: " + path);
-					if (exe.exists()) {
-						chromeOptions.setBinary(path);
-					}
-				}
-			} else {
-				chromeOptions.setBinary(
-						"c:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
-			}
-		} else {
-		}
-		for (String optionAgrument : (new String[] {
-				"--user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0",
-				"--allow-running-insecure-content", "--allow-insecure-localhost",
-				"--enable-local-file-accesses", "--disable-notifications",
-				"--disable-save-password-bubble",
-				/* "start-maximized" , */
-				"--disable-default-app", "disable-infobars", "--no-sandbox ",
-				"--browser.download.folderList=2", "--disable-web-security",
-				"--disable-translate", "--disable-popup-blocking",
-				"--ignore-certificate-errors", "--no-proxy-server",
-				"--browser.helperApps.neverAsk.saveToDisk=image/jpg,text/csv,text/xml,application/xml,application/vnd.ms-excel,application/x-excel,application/x-msexcel,application/excel,application/pdf",
-				String.format("--browser.download.dir=%s", downloadFilepath)
-				/* "--user-data-dir=/path/to/your/custom/profile"  , */
-
-		})) {
-			chromeOptions.addArguments(optionAgrument);
-		}
-
-		// options for headless
-		if (headless) {
-			for (String optionAgrument : (new String[] { "headless",
-					"window-size=1200x800" })) {
-				chromeOptions.addArguments(optionAgrument);
-			}
-		}
-
-		capabilities.setBrowserName(DesiredCapabilities.chrome().getBrowserName());
-		capabilities.setCapability(
-				org.openqa.selenium.chrome.ChromeOptions.CAPABILITY, chromeOptions);
-		capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-		// https://stackoverflow.com/questions/48851036/how-to-configure-log-level-for-selenium
-		// https://stackoverflow.com/questions/28572783/no-log4j2-configuration-file-found-using-default-configuration-logging-only-er
+		// NOTE: ERROR StatusLogger No log4j2 configuration file found. Using
+		// default configuration: logging only errors to the console.
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable(LogType.PERFORMANCE, Level.INFO);
+		logPrefs.enable(LogType.PROFILER, Level.INFO);
 		logPrefs.enable(LogType.BROWSER, Level.INFO);
+		logPrefs.enable(LogType.CLIENT, Level.INFO);
 		logPrefs.enable(LogType.DRIVER, Level.INFO);
-		/*
-			logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-			logPrefs.enable(LogType.BROWSER, Level.ALL);
-			logPrefs.enable(LogType.DRIVER, Level.ALL);
-		*/
+		logPrefs.enable(LogType.SERVER, Level.INFO);
 		capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
-		driver = new ChromeDriver(capabilities);
+		profile.setPreference("webdriver.firefox.logfile", "/dev/null");
+		// NOTE: the next setting appears to have no effect.
+		// does one really need os-specific definition?
+		// like /dev/null for Linux vs. nul for Windows
+		System.setProperty("webdriver.firefox.logfile",
+				osName.equals("windows") ? "nul" : "/dev/null");
+
+		// no longer supported as of Selenium 3.8.x
+		// profile.setEnableNativeEvents(false);
+		profile.setPreference("dom.webnotifications.enabled", false);
+		// optional
+		/*
+		 profile.setPreference("general.useragent.override",
+			"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0");
+		*/
+		// System.err.println(System.getProperty("user.dir"));
+		capabilities.setCapability(FirefoxDriver.PROFILE, profile);
+		try {
+			driver = new FirefoxDriver(capabilities);
+			// driver.setLogLevel(FirefoxDriverLogLevel.ERROR);
+		} catch (WebDriverException e) {
+			e.printStackTrace();
+			throw new RuntimeException(
+					"Cannot initialize Firefox driver: " + e.toString());
+		}
 
 		// driver.setLogLevel(Level.ALL);
 		wait = new WebDriverWait(driver, flexibleWait);
