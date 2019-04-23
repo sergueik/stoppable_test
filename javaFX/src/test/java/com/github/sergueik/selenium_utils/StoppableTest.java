@@ -247,7 +247,8 @@ public class StoppableTest extends Application {
 		scroll(element);
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test: Creating new dialog on the display");
-		// NOTE: cannot instantiate JavaFx Application from an inner class, the BaseTest class itself
+		// NOTE: cannot instantiate JavaFx Application from an inner class, the
+		// BaseTest class itself
 		// must become a subclass of javaFx Application class
 		Application.launch(new String[] {});
 		// continue the test
@@ -350,25 +351,47 @@ public class StoppableTest extends Application {
 		// but appears to fail when run from sureFire
 		packagePath = this.getClass().getPackage().getName().replace(".", "/");
 
+		String resourcePath = "src/main/resources";
+		boolean useResourcePath = true;
+
 		if (debug) {
-			System.err.println("Loading from: " + Paths
-					.get(System.getProperty("user.dir")).resolve(String.format("%s/%s/%s",
-							projectPrefix, packagePath, "dialog_view.fxml"))
-					.toString());
+			System.err
+					.println(
+							"Loading from: "
+									+ Paths.get(System.getProperty("user.dir"))
+											.resolve(useResourcePath
+													? String.format("%s/%s", resourcePath,
+															"dialog_view.fxml")
+													: String.format("%s/%s/%s", projectPrefix,
+															packagePath, "dialog_view.fxml"))
+											.toString());
 		}
-		fxmlLoader.setLocation(new URL(
-				"file:///" + Paths.get(System.getProperty("user.dir")).resolve(String
-						.format("%s/%s/%s", projectPrefix, packagePath, "dialog_view.fxml"))
-						.toString()));
+		fxmlLoader
+				.setLocation(
+						new URL(
+								"file:///" + Paths.get(System.getProperty("user.dir"))
+										.resolve(useResourcePath
+												? String.format("%s/%s", resourcePath,
+														"dialog_view.fxml")
+												: String.format("%s/%s/%s", projectPrefix, packagePath,
+														"dialog_view.fxml"))
+										.toString()));
 		Parent parent = fxmlLoader.load();
 		VanillaControllerEx controller = fxmlLoader.getController();
 		controller.setMainStage(stage);
 
 		Scene scene = new Scene(parent, 600, 650); // TODO: measure?
-		scene.getStylesheets().add("file:///" + Paths
-				.get(System.getProperty("user.dir")).resolve(String.format("%s/%s/%s",
-						projectPrefix, packagePath, "dialog_styles.css"))
-				.toString().replace("\\", "/"));
+		scene.getStylesheets()
+				.add(
+						"file:///"
+								+ Paths.get(System.getProperty("user.dir"))
+										.resolve(
+												useResourcePath
+														? String.format("%s/%s", resourcePath,
+																"dialog_styles.css")
+														: String.format("%s/%s/%s", projectPrefix,
+																packagePath, "dialog_styles.css"))
+										.toString().replace("\\", "/"));
 
 		controller.setMainStage(stage);
 		stage.setTitle(data.get("title"));
@@ -381,19 +404,23 @@ public class StoppableTest extends Application {
 			System.err.println("Controller is not reachable.");
 		}
 	}
+
 	public static class VanillaControllerEx {
-		// The JavaFx controller class can be statically defined within another		
-		// make sure to ensure the "/*@fx:controller" attribute is defined correctly  
+		// The JavaFx controller class can be statically defined within another
+		// make sure to ensure the "/*@fx:controller" attribute is defined correctly
 		private String closeMessage = "Continue";
 
 		private Map<String, String> inputData = new HashMap<>();
 
 		public void setInputData(Map<String, String> inputData) {
 			this.inputData = inputData;
-			this.contentPreformatted.textProperty().set(inputData.get((Object) "code"));
+			this.contentPreformatted.textProperty()
+					.set(inputData.get((Object) "code"));
 			this.headerText.textProperty().set(inputData.get((Object) "header text"));
-			this.contentSummary.textProperty().set(inputData.get((Object) "summary message"));
-			this.continueButton.textProperty().set(inputData.get((Object) "button text"));
+			this.contentSummary.textProperty()
+					.set(inputData.get((Object) "summary message"));
+			this.continueButton.textProperty()
+					.set(inputData.get((Object) "button text"));
 			this.closeMessage = inputData.get((Object) "close message");
 		}
 
@@ -422,8 +449,11 @@ public class StoppableTest extends Application {
 		public void setMainStage(Stage mainStage) {
 			this.mainStage = mainStage;
 		}
+
 		// TODO: on OSX
-                // org.apache.maven.surefire.booter.SurefireBooterForkException: The forked VM terminated without properly saying goodbye. VM crash or System.exit called?
+		// org.apache.maven.surefire.booter.SurefireBooterForkException: The forked
+		// VM terminated without properly saying goodbye. VM crash or System.exit
+		// called?
 		@FXML
 		private void initialize() {
 			continueButton.setOnAction(new EventHandler<ActionEvent>() {
