@@ -1,20 +1,13 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
-import java.nio.file.Paths;
-
-import java.time.Duration;
-
 import java.lang.reflect.Method;
-
+import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.net.URL;
-import java.net.URI;
-import java.net.URISyntaxException;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
@@ -31,7 +24,6 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -39,54 +31,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javafx.collections.ObservableList;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-
-//a type with the same simple name is already defined by the single-type-import of org.openqa.selenium.Alert
-//import javafx.scene.control.Alert;
-
-import javafx.scene.Parent;
-
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
-
 /**
  * Stoppable test example - JavaFx
  * @author: Serguei Kouzmine (kouzmine_serguei@yahoo.com)
  */
 
-// Dialog part based on:
-// https://examples.javacodegeeks.com/desktop-java/javafx/javafx-stage-example/
-@SuppressWarnings("restriction") // eclipse:MARS
-public class StoppableTest extends Application {
+public class StoppableTestDialogTest {
 	public int scriptTimeout = 5;
 	public int flexibleWait = 60; // possibly too long
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
-	private static Boolean done = false;
-	private static Boolean debug = false;
-	private final int width = 400;
-	private final String projectPrefix = "src/test/java";
-	private static String packagePath;
-
-	private final int height = 150;
 
 	private static final boolean headless = Boolean
 			.parseBoolean(System.getenv("HEADLESS"));
@@ -247,10 +201,7 @@ public class StoppableTest extends Application {
 		scroll(element);
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test: Creating new dialog on the display");
-		// NOTE: cannot instantiate JavaFx Application from an inner class, the
-		// BaseTest class itself
-		// must become a subclass of javaFx Application class
-		Application.launch(new String[] {});
+		TestDialog.main(new String[] { "10" });
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
@@ -324,147 +275,6 @@ public class StoppableTest extends Application {
 			return javascriptExecutor.executeScript(script, arguments);
 		} else {
 			throw new RuntimeException("Script execution failed.");
-		}
-	}
-
-	// can not create static inner class for JavaFx Application: would fail to
-	// initialize
-	@SuppressWarnings("unused")
-	@Override
-	public void start(Stage stage) throws Exception {
-		FXMLLoader fxmlLoader = new FXMLLoader();
-		Map<String, String> data = new HashMap<>();
-		data.put("title", "Selenium Dialog (WIP)");
-		data.put("close message", "Abort dialog is closed");
-		data.put("header text", "The test is being aborted");
-		data.put("summary message", "Exception in the code");
-		data.put("button text", "Abort");
-		data.put("code",
-				"Exception in Application start method\n"
-						+ "java.lang.reflect.InvocationTargetException\n"
-						+ "        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n"
-						+ "        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n"
-						+ "        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n"
-						+ "        at java.lang.reflect.Method.invoke(Method.java:498)");
-
-		// NOTE: Without the absolute path, would search current directory,
-		// but appears to fail when run from sureFire
-		packagePath = this.getClass().getPackage().getName().replace(".", "/");
-
-		String resourcePath = "src/main/resources";
-		boolean useResourcePath = true;
-
-		if (debug) {
-			System.err
-					.println(
-							"Loading from: "
-									+ Paths.get(System.getProperty("user.dir"))
-											.resolve(useResourcePath
-													? String.format("%s/%s", resourcePath,
-															"dialog_view.fxml")
-													: String.format("%s/%s/%s", projectPrefix,
-															packagePath, "dialog_view.fxml"))
-											.toString());
-		}
-		fxmlLoader
-				.setLocation(
-						new URL(
-								"file:///" + Paths.get(System.getProperty("user.dir"))
-										.resolve(useResourcePath
-												? String.format("%s/%s", resourcePath,
-														"dialog_view.fxml")
-												: String.format("%s/%s/%s", projectPrefix, packagePath,
-														"dialog_view.fxml"))
-										.toString()));
-		Parent parent = fxmlLoader.load();
-		VanillaControllerEx controller = fxmlLoader.getController();
-		controller.setMainStage(stage);
-
-		Scene scene = new Scene(parent, 600, 650); // TODO: measure?
-		scene.getStylesheets()
-				.add(
-						"file:///"
-								+ Paths.get(System.getProperty("user.dir"))
-										.resolve(
-												useResourcePath
-														? String.format("%s/%s", resourcePath,
-																"dialog_styles.css")
-														: String.format("%s/%s/%s", projectPrefix,
-																packagePath, "dialog_styles.css"))
-										.toString().replace("\\", "/"));
-
-		controller.setMainStage(stage);
-		stage.setTitle(data.get("title"));
-
-		stage.setScene(scene);
-		stage.show();
-		if (controller != null) {
-			controller.setInputData(data);
-		} else {
-			System.err.println("Controller is not reachable.");
-		}
-	}
-
-	public static class VanillaControllerEx {
-		// The JavaFx controller class can be statically defined within another
-		// make sure to ensure the "/*@fx:controller" attribute is defined correctly
-		private String closeMessage = "Continue";
-
-		private Map<String, String> inputData = new HashMap<>();
-
-		public void setInputData(Map<String, String> inputData) {
-			this.inputData = inputData;
-			this.contentPreformatted.textProperty()
-					.set(inputData.get((Object) "code"));
-			this.headerText.textProperty().set(inputData.get((Object) "header text"));
-			this.contentSummary.textProperty()
-					.set(inputData.get((Object) "summary message"));
-			this.continueButton.textProperty()
-					.set(inputData.get((Object) "button text"));
-			this.closeMessage = inputData.get((Object) "close message");
-		}
-
-		public Map<String, String> getInputData() {
-			return this.inputData;
-		}
-
-		private Stage mainStage;
-
-		@FXML
-		private Button continueButton;
-
-		@FXML
-		private Label headerText;
-
-		@FXML
-		private Label contentSummary;
-
-		@FXML
-		private Label contentPreformatted;
-
-		private Parent fxmlEdit;
-
-		private Stage stage;
-
-		public void setMainStage(Stage mainStage) {
-			this.mainStage = mainStage;
-		}
-
-		// TODO: on OSX
-		// org.apache.maven.surefire.booter.SurefireBooterForkException: The forked
-		// VM terminated without properly saying goodbye. VM crash or System.exit
-		// called?
-		@FXML
-		private void initialize() {
-			continueButton.setOnAction(new EventHandler<ActionEvent>() {
-				@Override
-				public void handle(ActionEvent event) {
-					if (closeMessage != null) {
-						System.err.println(closeMessage);
-					}
-					Platform.exit();
-				}
-			});
 		}
 	}
 }

@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <!-- NOTE: embedding one into the other -->
-<BorderPane xmlns="http://javafx.com/javafx/8"  xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.sergueik.selenium_utils.StoppableTest$VanillaControllerEx">
+<BorderPane xmlns="http://javafx.com/javafx/8"  xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.sergueik.selenium_utils.TestDialog">
   <top>
     <BorderPane styleClass="header-section">
       <left>
