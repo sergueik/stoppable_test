@@ -356,26 +356,22 @@ public class StoppableEmbeddedDialogTest extends Application {
 
 		if (debug) {
 			System.err
-					.println(
-							"Loading from: "
-									+ Paths.get(System.getProperty("user.dir"))
-											.resolve(useResourcePath
-													? String.format("%s/%s", resourcePath,
-															"embedded_dialog_view.fxml")
-													: String.format("%s/%s/%s", projectPrefix,
-															packagePath, "embedded_dialog_view.fxml"))
-											.toString());
+					.println("Loading from: " + Paths.get(System.getProperty("user.dir"))
+							.resolve(useResourcePath
+									? String.format("%s/%s", resourcePath,
+											"embedded_dialog_view.fxml")
+									: String.format("%s/%s/%s", projectPrefix, packagePath,
+											"embedded_dialog_view.fxml"))
+							.toString());
 		}
-		fxmlLoader
-				.setLocation(
-						new URL(
-								"file:///" + Paths.get(System.getProperty("user.dir"))
-										.resolve(useResourcePath
-												? String.format("%s/%s", resourcePath,
-														"embedded_dialog_view.fxml")
-												: String.format("%s/%s/%s", projectPrefix, packagePath,
-														"embedded_dialog_view.fxml"))
-										.toString()));
+		fxmlLoader.setLocation(
+				new URL("file:///" + Paths.get(System.getProperty("user.dir"))
+						.resolve(useResourcePath
+								? String.format("%s/%s", resourcePath,
+										"embedded_dialog_view.fxml")
+								: String.format("%s/%s/%s", projectPrefix, packagePath,
+										"embedded_dialog_view.fxml"))
+						.toString()));
 		Parent parent = fxmlLoader.load();
 		VanillaControllerEx controller = fxmlLoader.getController();
 		controller.setMainStage(stage);
@@ -397,7 +393,9 @@ public class StoppableEmbeddedDialogTest extends Application {
 		stage.setTitle(data.get("title"));
 
 		stage.setScene(scene);
-		stage.show();
+		Platform.runLater(() -> {
+			stage.show();
+		});
 		if (controller != null) {
 			controller.setInputData(data);
 		} else {

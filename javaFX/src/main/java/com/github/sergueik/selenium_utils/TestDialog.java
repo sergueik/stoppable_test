@@ -189,11 +189,12 @@ public class TestDialog extends Application {
 		thread.setDaemon(true);
 		thread.start();
 
-		primaryStage.setScene(scene);
-		primaryStage.show();
+		Platform.runLater(() -> {
+			primaryStage.setScene(scene);
+			primaryStage.show();
+		});
 
 		/*
-		    
 		    Stage myDialog = new MyDialog(primaryStage);
 		    myDialog.sizeToScene();
 		    myDialog.show();
@@ -209,7 +210,7 @@ public class TestDialog extends Application {
 
 		String resourcePath = "src/main/resources";
 		boolean useResourcePath = true;
-
+		Platform.setImplicitExit(false);
 		if (debug) {
 			System.err
 					.println("Loading from: " + Paths.get(System.getProperty("user.dir"))
@@ -222,6 +223,7 @@ public class TestDialog extends Application {
 		}
 		// java.lang.IllegalStateException: Application launch must not be called
 		// more thanonce
+		// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
 		launch(args);
 	}
 

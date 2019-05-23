@@ -4,7 +4,7 @@
   <groupId>com.github.sergueik.selenium_utils</groupId>
   <artifactId>stoppable_test_swing</artifactId>
   <packaging>jar</packaging>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
   <name>app</name>
   <description>This demonstrates launching GUI dialog to pause the Selenium test until 'Continue'  button is pressed (Swing version)</description>
   <url>http://maven.apache.org</url>
