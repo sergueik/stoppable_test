@@ -14,14 +14,16 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
-
+import javafx.scene.layout.HBox;
 import javafx.scene.Parent;
+import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 
 @SuppressWarnings("restriction")
 public class TestDialog extends Application {
@@ -30,8 +32,9 @@ public class TestDialog extends Application {
 	private static Boolean debug = false;
 	private static final String projectPrefix = "src/main/java";
 
-	private static final String resourcePath = "src/main/resources";
+	private static String resourcePath = "src/main/resources";
 	private static final boolean useResourcePath = true;
+	private static final String fillerMessage = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation";
 
 	private static int count = 0;
 	private final Text text = new Text(Integer.toString(count));
@@ -94,12 +97,15 @@ public class TestDialog extends Application {
 				Platform.exit();
 			}
 		});
+
 	}
 
 	private void decrementCount() {
 		count--;
 		if (count > 0) {
-			text.setText(Integer.toString(count));
+			text.setUserData(count);
+			text.setText(String.format("%s %s", fillerMessage.substring(0, 3 * count),
+					Integer.toString(count)));
 		} else {
 			Platform.exit();
 			// System.exit(0);
@@ -165,6 +171,27 @@ public class TestDialog extends Application {
 
 			@Override
 			public void run() {
+
+				text.setOnMouseEntered(new EventHandler<MouseEvent>() {
+					@Override
+					public void handle(MouseEvent e) {
+						System.err.println(String.format("The text bounds: %.2f %.2f",
+								Math.floor(text.getBoundsInLocal().getWidth()),
+								Math.floor(text.getBoundsInLocal().getHeight())));
+
+						text.setScaleX(1.5);
+						text.setScaleY(1.5);
+					}
+				});
+
+				text.setOnMouseExited(new EventHandler<MouseEvent>() {
+					@Override
+					public void handle(MouseEvent e) {
+						text.setScaleX(1);
+						text.setScaleY(1);
+					}
+				});
+
 				Runnable updater = new Runnable() {
 
 					@Override
@@ -208,7 +235,6 @@ public class TestDialog extends Application {
 			count = 5;
 		}
 
-		String resourcePath = "src/main/resources";
 		boolean useResourcePath = true;
 		Platform.setImplicitExit(false);
 		if (debug) {
