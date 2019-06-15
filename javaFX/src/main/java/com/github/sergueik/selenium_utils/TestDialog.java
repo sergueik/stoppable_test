@@ -20,6 +20,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.control.Label;
@@ -73,6 +74,9 @@ public class TestDialog extends Application {
 
 	@FXML
 	private Label contentPreformatted;
+
+	@FXML
+	private Image dialogImage;
 
 	private Parent fxmlEdit;
 
@@ -171,14 +175,18 @@ public class TestDialog extends Application {
 
 			@Override
 			public void run() {
-
 				text.setOnMouseEntered(new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent e) {
 						System.err.println(String.format("The text bounds: %.2f %.2f",
 								Math.floor(text.getBoundsInLocal().getWidth()),
 								Math.floor(text.getBoundsInLocal().getHeight())));
+						if (dialogImage != null) {							System.err.println(String.format("The image url: %.2s",
+									dialogImage.impl_getUrl()));
+						} else {
+							System.err.println("image is not loaded into controller var");
 
+						}
 						text.setScaleX(1.5);
 						text.setScaleY(1.5);
 					}

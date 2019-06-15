@@ -20,11 +20,11 @@
         <Label fx:id="headerText" text="Application Header"/>
       </left>
       <right>
-      <Label>
+      <Label fx:id="dialogImageLabel">
           <graphic>
-            <ImageView fitHeight="128" fitWidth="128" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="dialogImageView" fitHeight="128" fitWidth="128" pickOnBounds="true" preserveRatio="true">
               <image>
-                <Image url="@watchglass.png"/>
+                <Image fx:id="dialogImage" url="@watchglass.png"/>
               </image>
             </ImageView>
           </graphic>

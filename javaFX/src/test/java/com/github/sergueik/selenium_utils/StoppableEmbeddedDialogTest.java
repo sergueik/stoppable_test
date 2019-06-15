@@ -1,6 +1,7 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 import java.time.Duration;
@@ -9,7 +10,9 @@ import java.lang.reflect.Method;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import java.util.logging.Level;
+
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,8 +42,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javafx.collections.ObservableList;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -55,17 +56,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 
 /**
  * Stoppable test example - JavaFx
@@ -440,6 +437,15 @@ public class StoppableEmbeddedDialogTest extends Application {
 		@FXML
 		private Label contentPreformatted;
 
+		@FXML
+		private ImageView dialogImageView;
+
+		@FXML
+		private Label dialogImageLabel;
+
+		@FXML
+		private Image dialogImage;
+
 		private Parent fxmlEdit;
 
 		private Stage stage;
@@ -457,9 +463,32 @@ public class StoppableEmbeddedDialogTest extends Application {
 			continueButton.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
-					if (closeMessage != null) {
-						System.err.println(closeMessage);
+					if (dialogImage != null) {
+						System.err.println(
+								String.format("The image url: %s", dialogImage.impl_getUrl()));
 					}
+					if (dialogImageLabel != null) {
+						System.err.println(String.format("iterating over %d children",
+								dialogImageLabel.getChildrenUnmodifiable().size()));
+						for (int i = 0; i != dialogImageLabel.getChildrenUnmodifiable()
+								.size(); i++) {
+
+							Node itemNode = dialogImageLabel.getChildrenUnmodifiable().get(i);
+							System.err.println(String.format("The node %d class is: \"%s\"",
+									i, itemNode.getClass().getName()));
+							if (itemNode.getClass().getName()
+									.equals("javafx.scene.image.ImageView")) {
+								ImageView imageView = (ImageView) itemNode;
+								System.err.println(String.format("The child image url: %s",
+										imageView.getImage().impl_getUrl()));
+
+							}
+							// image.add(itemImage.getFileImage());
+						}
+					} else {
+						System.err.println("image label is not loaded into controller var");
+					}
+					System.err.println(closeMessage);
 					Platform.exit();
 				}
 			});
