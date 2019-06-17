@@ -9,21 +9,21 @@ import java.util.Map;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
+
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.layout.HBox;
+
 import javafx.scene.Parent;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
 import javafx.scene.control.Label;
+import javafx.scene.text.Text;
+import javafx.scene.control.OverrunStyle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.input.MouseEvent;
 
 @SuppressWarnings("restriction")
@@ -35,36 +35,19 @@ public class TestDialog extends Application {
 
 	private static String resourcePath = "src/main/resources";
 	private static final boolean useResourcePath = true;
-	private static final String fillerMessage = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation";
-
+	// private static final String fillerMessage = "Lorem ipsum dolor sit amet,
+	// consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+	// dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation";
+	private static final String fillerMessage = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed ";
 	private static int count = 0;
 	private final Text text = new Text(Integer.toString(count));
-
-	// The JavaFx controller class can be statically defined within another
-	// make sure to ensure the "/*@fx:controller" attribute is defined correctly
-	private String closeMessage = "Continue";
+	private final Label label = new Label(text.getText());
 
 	private Map<String, String> inputData = new HashMap<>();
-
-	public void setInputData(Map<String, String> inputData) {
-		this.inputData = inputData;
-		this.contentPreformatted.textProperty().set(inputData.get((Object) "code"));
-		this.headerText.textProperty().set(inputData.get((Object) "header text"));
-		this.contentSummary.textProperty()
-				.set(inputData.get((Object) "summary message"));
-		this.continueButton.textProperty()
-				.set(inputData.get((Object) "button text"));
-		this.closeMessage = inputData.get((Object) "close message");
-	}
 
 	public Map<String, String> getInputData() {
 		return this.inputData;
 	}
-
-	private Stage mainStage;
-
-	@FXML
-	private Button continueButton;
 
 	@FXML
 	private Label headerText;
@@ -75,51 +58,13 @@ public class TestDialog extends Application {
 	@FXML
 	private Label contentPreformatted;
 
-	@FXML
-	private Image dialogImage;
-
-	private Parent fxmlEdit;
-
-	private Stage stage;
-
-	public void setMainStage(Stage mainStage) {
-		this.mainStage = mainStage;
-	}
-
-	// TODO: on OSX
-	// org.apache.maven.surefire.booter.SurefireBooterForkException: The forked
-	// VM terminated without properly saying goodbye. VM crash or System.exit
-	// called?
-	@FXML
-	private void initialize() {
-		continueButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				if (closeMessage != null) {
-					System.err.println(closeMessage);
-				}
-				Platform.exit();
-			}
-		});
-
-	}
-
-	private void decrementCount() {
-		count--;
-		if (count > 0) {
-			text.setUserData(count);
-			text.setText(String.format("%s %s", fillerMessage.substring(0, 3 * count),
-					Integer.toString(count)));
-		} else {
-			Platform.exit();
-			// System.exit(0);
-		}
-	}
-
 	@Override
 	public void start(Stage primaryStage) {
 		StackPane root = new StackPane();
-		root.getChildren().add(text);
+		// OverrunStyle is a method of the Label
+		label.setTextOverrun(OverrunStyle.ELLIPSIS);
+		// root.getChildren().add(text);
+		root.getChildren().add(label);
 
 		Scene scene = new Scene(root, 200, 200);
 		scene.getStylesheets()
@@ -175,28 +120,53 @@ public class TestDialog extends Application {
 
 			@Override
 			public void run() {
-				text.setOnMouseEntered(new EventHandler<MouseEvent>() {
+				label.setOnMouseEntered(new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent e) {
 						System.err.println(String.format("The text bounds: %.2f %.2f",
 								Math.floor(text.getBoundsInLocal().getWidth()),
 								Math.floor(text.getBoundsInLocal().getHeight())));
-						if (dialogImage != null) {							System.err.println(String.format("The image url: %.2s",
-									dialogImage.impl_getUrl()));
-						} else {
-							System.err.println("image is not loaded into controller var");
 
-						}
-						text.setScaleX(1.5);
-						text.setScaleY(1.5);
+						String labelText = label.getText();
+						System.err.println("Rendering: " + labelText);
+						Font font = label.getFont();
+						double currentWidth = label.getWidth();
+						double currentHeight = label.getHeight();
+						label.prefHeight(currentHeight * 1.5);
+						label.prefWidth(currentWidth * 1.5);
+						label.setMaxHeight(currentHeight * 1.5);
+						label.setMaxWidth(currentWidth * 1.5);
+						label.setScaleX(0.75);
+						label.setScaleY(0.75);
+						// text.setFont(Font.font("SansSerif", FontWeight.NORMAL, 20));
+						System.err.println("Setting font size to " + font.getSize() * 1.5);
+						Font font2 = Font.font(font.getName(), FontWeight.NORMAL,
+								font.getSize() * 1.5);
+						label.setFont(font2);
+						label.setText(labelText);
 					}
 				});
 
-				text.setOnMouseExited(new EventHandler<MouseEvent>() {
+				label.setOnMouseExited(new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent e) {
-						text.setScaleX(1);
-						text.setScaleY(1);
+						String labelText = label.getText();
+						System.err.println("Rendering(2): " + labelText);
+						double currentWidth = label.getWidth();
+						double currentHeight = label.getHeight();
+						label.prefHeight(currentHeight * 0.75);
+						label.prefWidth(currentWidth * 0.75);
+						label.setMaxHeight(currentHeight * 0.75);
+						label.setMaxWidth(currentWidth * 0.75);
+						label.setScaleX(1);
+						label.setScaleY(1);
+						// text.setFont(Font.font("SansSerif", FontWeight.NORMAL, 30));
+						Font font = label.getFont();
+						System.err.println("Setting font size to " + font.getSize() * 0.75);
+						Font font2 = Font.font(font.getName(), FontWeight.NORMAL,
+								font.getSize() * 0.75);
+						label.setFont(font2);
+						label.setText(labelText);
 					}
 				});
 
@@ -204,7 +174,20 @@ public class TestDialog extends Application {
 
 					@Override
 					public void run() {
-						decrementCount();
+						count--;
+						if (count > 0) {
+							// https://www.programcreek.com/java-api-examples/index.php?api=javafx.scene.control.OverrunStyle
+							// text.setTextOverrun(OverrunStyle.ELLIPSIS);
+							text.setUserData(count);
+							text.setText(String.format("%s %s", fillerMessage,
+									Integer.toString(count)));
+							label.setText(String.format("%s %s", fillerMessage,
+									Integer.toString(count)));
+
+						} else {
+							Platform.exit();
+							// System.exit(0);
+						}
 					}
 				};
 

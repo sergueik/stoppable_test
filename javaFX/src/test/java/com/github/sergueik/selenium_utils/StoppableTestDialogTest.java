@@ -201,7 +201,7 @@ public class StoppableTestDialogTest {
 		scroll(element);
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test: Creating new dialog on the display");
-		TestDialog.main(new String[] { "10" });
+		TestDialog.main(new String[] { "60" });
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
