@@ -1,9 +1,9 @@
 ### Info
 
 This project demonstrates pausing the Selenium test through an modal dialog which is available or can be easily composed from library dialog widgets in all common java GUI frameworks:
-  * [SWT](http://www.java2s.com/Tutorial/Java/0280__SWT/Catalog0280__SWT.htm) 
-  * [JavaFx](http://www.java2s.com/Tutorials/Java/JavaFX/index.htm) 
-  * [Swing](http://www.java2s.com/Tutorial/Java/0240__Swing/Catalog0240__Swing.htm)
+  * [Eclipse Standard Widget Toolkit](https://www.eclipse.org/swt/) and its [WindowBuider](https://www.eclipse.org/windowbuilder/)
+  * [JavaFx](https://openjfx.io/)
+  * [Swing Framework](https://docs.oracle.com/javase/8/docs/api/index.html?javax/swing/package-summary.html) with [GUI Designer](https://marketplace.eclipse.org/content/jformdesigner-swing-gui-designer#group-screenshots) or [JForm Designer](https://www.formdev.com/jformdesigner/download/)
 
 The most basic dialog widget is sufficient for the cause, despite slight differences in the under the hood implementations of the widget event loop processing by these mainstream Java UI frameworks.
 
@@ -25,7 +25,7 @@ The examples in this directory borrows one of the test scenarios from another re
 
 Using Java for stop dialog guarantees platform independnce,
 at a low cost that a different set of jars need to be used for Mac OSX, Linux and Windows (32 or 64 bit) for SWT.
-This is easily solvable through property activated profiles, but may become a little of a challenge if the test suite itself needs maven profiles for some other purpose. 
+This is easily solvable through property activated profiles, but may become a little of a challenge if the test suite itself needs maven profiles for some other purpose.
 The JavaFx and Swing versions have no such platformr-specific jar dependencies.
 
 ![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swing.png)
@@ -51,11 +51,14 @@ Timed out waiting for driver server to start.
 No such problem with (also old) build of Firefox and the geckodriver
 ![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swing_hackintosh.png)
 
-
 ### See Also
-  * [Eclipse Standard Widget Toolkit](https://www.eclipse.org/swt/)
+  * [Eclipse SWT](http://www.java2s.com/Tutorial/Java/0280__SWT/Catalog0280__SWT.htm) tutorial on java2s
+  * [JavaFX](http://www.java2s.com/Tutorials/Java/JavaFX/index.htm) tutorial on java2s
+  * [Swing](http://www.java2s.com/Tutorial/Java/0240__Swing/Catalog0240__Swing.htm) tutorial on java2s
+  * [JavaFX overview](https://docs.oracle.com/javase/8/javafx/get-started-tutorial/jfx-overview.htm)
   * [Tutorial for eclipse SWT and Jface dialogs](http://www.vogella.com/tutorials/EclipseDialogs/article.html)
-  * [Swing Dialogs](https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html)
+  * [core Swing Dialogs](https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html)
+  * [Swing Tutotial](http://zetcode.com/tutorials/javaswingtutorial/)
 
 ### License
 This project is licensed under the terms of the MIT license.
