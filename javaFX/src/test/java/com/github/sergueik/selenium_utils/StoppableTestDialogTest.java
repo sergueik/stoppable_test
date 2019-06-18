@@ -200,11 +200,24 @@ public class StoppableTestDialogTest {
 		// scroll to the new page element
 		scroll(element);
 		// stop the test until user chooses to continue
-		System.err.println("Hold the test: Creating new dialog on the display");
-		TestDialog.main(new String[] { "60" });
+		System.err.println("Hold the test1: Creating new dialog on the display");
+		TestDialog.main(new String[] { "5" });
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
+		// TODO: deal with handles and waits to produce a consistent behavior
+		sleep(5000);
+	}
+
+	@Test(enabled = true)
+	public void test2() {
+		driver.navigate().to("http://www.wikipedia.org/");
+		// String handle = createWindow(altURL);
+		// stop the test until user chooses to continue
+		System.err.println("Hold the test2: Creating new dialog on the display");
+		TestDialog.main2(new String[] { "10" });
+		// continue the test
+		System.err.println("Continue the test");
 		// TODO: deal with handles and waits to produce a consistent behavior
 		sleep(5000);
 	}

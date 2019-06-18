@@ -10,21 +10,13 @@ import java.util.Map;
 import javafx.application.Application;
 import javafx.application.Platform;
 
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.Label;
 import javafx.scene.text.Text;
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.input.MouseEvent;
 
 @SuppressWarnings("restriction")
 public class TestDialog extends Application {
@@ -35,13 +27,8 @@ public class TestDialog extends Application {
 
 	private static String resourcePath = "src/main/resources";
 	private static final boolean useResourcePath = true;
-	// private static final String fillerMessage = "Lorem ipsum dolor sit amet,
-	// consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-	// dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation";
-	private static final String fillerMessage = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed ";
 	private static int count = 0;
 	private final Text text = new Text(Integer.toString(count));
-	private final Label label = new Label(text.getText());
 
 	private Map<String, String> inputData = new HashMap<>();
 
@@ -49,22 +36,10 @@ public class TestDialog extends Application {
 		return this.inputData;
 	}
 
-	@FXML
-	private Label headerText;
-
-	@FXML
-	private Label contentSummary;
-
-	@FXML
-	private Label contentPreformatted;
-
 	@Override
 	public void start(Stage primaryStage) {
 		StackPane root = new StackPane();
-		// OverrunStyle is a method of the Label
-		label.setTextOverrun(OverrunStyle.ELLIPSIS);
-		// root.getChildren().add(text);
-		root.getChildren().add(label);
+		root.getChildren().add(text);
 
 		Scene scene = new Scene(root, 200, 200);
 		scene.getStylesheets()
@@ -120,55 +95,6 @@ public class TestDialog extends Application {
 
 			@Override
 			public void run() {
-				label.setOnMouseEntered(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent e) {
-						System.err.println(String.format("The text bounds: %.2f %.2f",
-								Math.floor(text.getBoundsInLocal().getWidth()),
-								Math.floor(text.getBoundsInLocal().getHeight())));
-
-						String labelText = label.getText();
-						System.err.println("Rendering: " + labelText);
-						Font font = label.getFont();
-						double currentWidth = label.getWidth();
-						double currentHeight = label.getHeight();
-						label.prefHeight(currentHeight * 1.5);
-						label.prefWidth(currentWidth * 1.5);
-						label.setMaxHeight(currentHeight * 1.5);
-						label.setMaxWidth(currentWidth * 1.5);
-						label.setScaleX(0.75);
-						label.setScaleY(0.75);
-						// text.setFont(Font.font("SansSerif", FontWeight.NORMAL, 20));
-						System.err.println("Setting font size to " + font.getSize() * 1.5);
-						Font font2 = Font.font(font.getName(), FontWeight.NORMAL,
-								font.getSize() * 1.5);
-						label.setFont(font2);
-						label.setText(labelText);
-					}
-				});
-
-				label.setOnMouseExited(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent e) {
-						String labelText = label.getText();
-						System.err.println("Rendering(2): " + labelText);
-						double currentWidth = label.getWidth();
-						double currentHeight = label.getHeight();
-						label.prefHeight(currentHeight * 0.75);
-						label.prefWidth(currentWidth * 0.75);
-						label.setMaxHeight(currentHeight * 0.75);
-						label.setMaxWidth(currentWidth * 0.75);
-						label.setScaleX(1);
-						label.setScaleY(1);
-						// text.setFont(Font.font("SansSerif", FontWeight.NORMAL, 30));
-						Font font = label.getFont();
-						System.err.println("Setting font size to " + font.getSize() * 0.75);
-						Font font2 = Font.font(font.getName(), FontWeight.NORMAL,
-								font.getSize() * 0.75);
-						label.setFont(font2);
-						label.setText(labelText);
-					}
-				});
 
 				Runnable updater = new Runnable() {
 
@@ -178,12 +104,8 @@ public class TestDialog extends Application {
 						if (count > 0) {
 							// https://www.programcreek.com/java-api-examples/index.php?api=javafx.scene.control.OverrunStyle
 							// text.setTextOverrun(OverrunStyle.ELLIPSIS);
+							text.setText(Integer.toString(count));
 							text.setUserData(count);
-							text.setText(String.format("%s %s", fillerMessage,
-									Integer.toString(count)));
-							label.setText(String.format("%s %s", fillerMessage,
-									Integer.toString(count)));
-
 						} else {
 							Platform.exit();
 							// System.exit(0);
@@ -212,17 +134,12 @@ public class TestDialog extends Application {
 			primaryStage.show();
 		});
 
-		/*
-		    Stage myDialog = new MyDialog(primaryStage);
-		    myDialog.sizeToScene();
-		    myDialog.show();
-		 */
 	}
 
 	public static void main(String[] args) {
 		try {
 			count = Integer.parseInt(args[0]);
-		} catch (Exception e) {
+		} catch (NumberFormatException e) {
 			count = 5;
 		}
 
@@ -238,10 +155,40 @@ public class TestDialog extends Application {
 											"test_dialog_view.fxml"))
 							.toString());
 		}
-		// java.lang.IllegalStateException: Application launch must not be called
-		// more thanonce
+		// java.lang.IllegalStateException:
+		// Application launch must not be called more than once
 		// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
 		launch(args);
+	}
+
+	public static void main2(String[] args) {
+		Platform.setImplicitExit(false);
+		try {
+			count = Integer.parseInt(args[0]);
+		} catch (NumberFormatException e) {
+			count = 5;
+		}
+		// java.lang.IllegalStateException:
+		// Not on FX application thread; currentThread = main
+		// new TestDialog().start(new Stage());
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				// Your class that extends Application
+				new TestDialog().start(new Stage());
+				while (true) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException ex) {
+					}
+				}
+			}
+		});
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
