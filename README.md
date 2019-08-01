@@ -59,6 +59,7 @@ No such problem with (also old) build of Firefox and the geckodriver
   * [Tutorial for eclipse SWT and Jface dialogs](http://www.vogella.com/tutorials/EclipseDialogs/article.html)
   * [core Swing Dialogs](https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html)
   * [Swing Tutotial](http://zetcode.com/tutorials/javaswingtutorial/)
+  * [collection](https://github.com/aterai/java-swing-tips) of core Java Swing GUI programs with small source code examples
 
 ### License
 This project is licensed under the terms of the MIT license.

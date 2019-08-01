@@ -48,7 +48,8 @@ public class StoppableTest {
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
 
-	private static final boolean headless = Boolean.parseBoolean(System.getenv("HEADLESS"));
+	private static final boolean headless = Boolean
+			.parseBoolean(System.getenv("HEADLESS"));
 	private static String baseURL = "https://www.linux.org"; // "https://www.urbandictionary.com/";
 	// NOTE: some sites may be blocked via content filtering
 	// Sorry, www.urbandictionary.com has been blocked by your network
@@ -68,14 +69,18 @@ public class StoppableTest {
 	@BeforeClass
 	public void beforeClass() {
 
-		System.setProperty("webdriver.firefox.driver", /* webdriver.firefox.driver ? */
-				osName.equals("windows") ? (new File("c:/java/selenium/geckodriver.exe")).getAbsolutePath()
-						: Paths.get(System.getProperty("user.home")).resolve("Downloads").resolve("geckodriver")
-								.toAbsolutePath().toString());
+		// earlier versions firefox and grckodriver needed
+		// "webdriver.firefox.marionette"
+		System.setProperty("webdriver.gecko.driver",
+				osName.equals("windows")
+						? (new File("c:/java/selenium/geckodriver.exe")).getAbsolutePath()
+						: Paths.get(System.getProperty("user.home")).resolve("Downloads")
+								.resolve("geckodriver").toAbsolutePath().toString());
 
 		System.setProperty("webdriver.firefox.bin",
 				osName.equals("windows")
-						? new File("c:/Program Files (x86)/Mozilla Firefox/firefox.exe").getAbsolutePath()
+						? new File("c:/Program Files (x86)/Mozilla Firefox/firefox.exe")
+								.getAbsolutePath()
 						: "/usr/bin/firefox");
 
 		// https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
@@ -92,7 +97,8 @@ public class StoppableTest {
 		// http://kb.mozillazine.org/Network.cookie.cookieBehavior
 		// profile.setPreference("network.cookie.cookieBehavior", 2);
 		// no cookies are allowed
-		profile.setPreference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream,text/csv");
+		profile.setPreference("browser.helperApps.neverAsk.saveToDisk",
+				"application/octet-stream,text/csv");
 		profile.setPreference("browser.helperApps.neverAsk.openFile",
 				"text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml");
 		// TODO: cannot find symbol: method
@@ -121,7 +127,8 @@ public class StoppableTest {
 		// NOTE: the next setting appears to have no effect.
 		// does one really need os-specific definition?
 		// like /dev/null for Linux vs. nul for Windows
-		System.setProperty("webdriver.firefox.logfile", osName.equals("windows") ? "nul" : "/dev/null");
+		System.setProperty("webdriver.firefox.logfile",
+				osName.equals("windows") ? "nul" : "/dev/null");
 
 		// no longer supported as of Selenium 3.8.x
 		// profile.setEnableNativeEvents(false);
@@ -138,14 +145,17 @@ public class StoppableTest {
 			// driver.setLogLevel(FirefoxDriverLogLevel.ERROR);
 		} catch (WebDriverException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Cannot initialize Firefox driver: " + e.toString());
-			// java.lang.RuntimeException: 
-			//	Cannot initialize Firefox driver: org.openqa.selenium.firefox.UnableToCreateProfileException: java.io.IOException: Can only install from a zip file, an XPI or a directory: /home/sergueik/Downloads/geckodriver 
+			throw new RuntimeException(
+					"Cannot initialize Firefox driver: " + e.toString());
+			// java.lang.RuntimeException:
+			// Cannot initialize Firefox driver:
+			// org.openqa.selenium.firefox.UnableToCreateProfileException:
+			// java.io.IOException: Can only install from a zip file, an XPI or a
+			// directory: /home/sergueik/Downloads/geckodriver
 		}
 
-		
-		driver.manage().timeouts().implicitlyWait(90,TimeUnit.SECONDS); 
-		driver.manage().timeouts().pageLoadTimeout(50,TimeUnit.SECONDS); 
+		driver.manage().timeouts().implicitlyWait(180, TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(50, TimeUnit.SECONDS);
 		// driver.setLogLevel(Level.ALL);
 		wait = new WebDriverWait(driver, flexibleWait);
 
@@ -194,7 +204,8 @@ public class StoppableTest {
 		// scroll to the new page element
 		scroll(element);
 		// stop the test until user chooses to continue
-		System.err.println("Hold the test: creating new Swing dialog on the display");
+		System.err
+				.println("Hold the test: creating new Swing dialog on the display");
 		// new TestDialog();
 		new TestDialog("exampleTest", true, 2);
 		// continue the test
@@ -207,12 +218,16 @@ public class StoppableTest {
 	private void injectElement(String name) {
 
 		// Inject an anchor element
-		executeScript("var anchorTag = document.createElement('a'); "
-				+ "anchorTag.appendChild(document.createTextNode('nwh'));"
-				+ "anchorTag.setAttribute('id', arguments[0]);" + "anchorTag.setAttribute('href', arguments[1]);"
-				+ "anchorTag.setAttribute('target', '_blank');" + "anchorTag.setAttribute('style', 'display:block;');"
-				+ "var firstElement = document.getElementsByTagName('body')[0].getElementsByTagName('*')[0];"
-				+ "firstElement.parentElement.appendChild(anchorTag);", name, altURL);
+		executeScript(
+				"var anchorTag = document.createElement('a'); "
+						+ "anchorTag.appendChild(document.createTextNode('nwh'));"
+						+ "anchorTag.setAttribute('id', arguments[0]);"
+						+ "anchorTag.setAttribute('href', arguments[1]);"
+						+ "anchorTag.setAttribute('target', '_blank');"
+						+ "anchorTag.setAttribute('style', 'display:block;');"
+						+ "var firstElement = document.getElementsByTagName('body')[0].getElementsByTagName('*')[0];"
+						+ "firstElement.parentElement.appendChild(anchorTag);",
+				name, altURL);
 		// common error with this approach: Element is not clickable at point
 		// HTML, HEAD, BODY, some element
 	}
@@ -261,7 +276,8 @@ public class StoppableTest {
 
 	public Object executeScript(String script, Object... arguments) {
 		if (driver instanceof JavascriptExecutor) {
-			JavascriptExecutor javascriptExecutor = JavascriptExecutor.class.cast(driver);
+			JavascriptExecutor javascriptExecutor = JavascriptExecutor.class
+					.cast(driver);
 			return javascriptExecutor.executeScript(script, arguments);
 		} else {
 			throw new RuntimeException("Script execution failed.");
