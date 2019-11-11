@@ -60,6 +60,7 @@ No such problem with (also old) build of Firefox and the geckodriver
   * [core Swing Dialogs](https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html)
   * [Swing Tutotial](http://zetcode.com/tutorials/javaswingtutorial/)
   * [collection](https://github.com/aterai/java-swing-tips) of core Java Swing GUI programs with small source code examples
+  * [discusion](https://toster.ru/q/683495) (in Russian) of multi scene root app lauch error
 
 ### License
 This project is licensed under the terms of the MIT license.

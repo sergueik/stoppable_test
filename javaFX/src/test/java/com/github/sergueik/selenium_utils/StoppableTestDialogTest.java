@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import java.lang.IllegalStateException;
+// to ignore the javaFx exception on atttempt to launch Application more than once 
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
@@ -24,6 +27,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -186,11 +190,13 @@ public class StoppableTestDialogTest {
 	@AfterTest(alwaysRun = true)
 	public void afterTest() {
 		System.err.println("Finish the test");
-		driver.quit();
+		if (driver != null) {
+			driver.quit();
+		}
 	}
 
-	@Test(enabled = true)
-	public void test1() {
+	@Test(enabled = false)
+	public void testDialogTest1() {
 		// String handle = createWindow(altURL);
 		String name = "Window_" + instanceCount++;
 		// inject an anchor element - will likely appear at the bottom of the page
@@ -201,7 +207,17 @@ public class StoppableTestDialogTest {
 		scroll(element);
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test1: Creating new dialog on the display");
-		TestDialog.main(new String[] { "5" });
+		try {
+			TestDialog.main(new String[] { "5" });
+		} catch (IllegalStateException e) {
+			// Application launch must not be called more than once
+			// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
+			// for an JavaFX application that is not allowed.
+			// https://stackoverflow.com/questions/38707913/java-lang-illegalstateexception-application-launch-must-not-be-called-more-than?noredirect=1&lq=1
+			// see also:
+			// https://stackoverflow.com/questions/46328192/javafx-illegalargumentexception-is-already-set-as-root-of-another-scene
+			System.err.println("Ignore the exception from javaFx " + e.toString());
+		}
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
@@ -209,8 +225,8 @@ public class StoppableTestDialogTest {
 		sleep(5000);
 	}
 
-	@Test(enabled = true)
-	public void test2() {
+	@Test(enabled = false)
+	public void testDialogTest2() {
 		driver.navigate().to("http://www.wikipedia.org/");
 		// String handle = createWindow(altURL);
 		// stop the test until user chooses to continue

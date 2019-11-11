@@ -107,6 +107,9 @@ public class TestDialog extends Application {
 							text.setText(Integer.toString(count));
 							text.setUserData(count);
 						} else {
+							scene.getRoot().setVisible(false);
+							primaryStage.hide();
+							// does not return from launch() unless the next line is called.
 							Platform.exit();
 							// System.exit(0);
 						}
@@ -121,6 +124,7 @@ public class TestDialog extends Application {
 
 					// UI update is run on the Application thread
 					Platform.runLater(updater);
+					
 				}
 			}
 
@@ -145,6 +149,7 @@ public class TestDialog extends Application {
 
 		boolean useResourcePath = true;
 		Platform.setImplicitExit(false);
+		// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
 		if (debug) {
 			System.err
 					.println("Loading from: " + Paths.get(System.getProperty("user.dir"))

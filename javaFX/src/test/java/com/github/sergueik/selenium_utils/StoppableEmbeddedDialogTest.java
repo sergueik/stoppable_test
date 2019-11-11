@@ -1,23 +1,17 @@
 package com.github.sergueik.selenium_utils;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+
 import java.nio.file.Paths;
 
 import java.time.Duration;
 
-import java.lang.reflect.Method;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.logging.Level;
 
-import java.net.URL;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
@@ -36,6 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import org.testng.ITestResult;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
@@ -46,23 +41,20 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-
-//a type with the same simple name is already defined by the single-type-import of org.openqa.selenium.Alert
-//import javafx.scene.control.Alert;
-
-import javafx.scene.Parent;
-
-import javafx.scene.Scene;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+
+// a type with the same simple name is already defined 
+// by the single-type-import of org.openqa.selenium.Alert
+// import javafx.scene.control.Alert;
 
 /**
  * Stoppable test example - JavaFx
@@ -73,15 +65,19 @@ import javafx.stage.Stage;
 // https://examples.javacodegeeks.com/desktop-java/javafx/javafx-stage-example/
 @SuppressWarnings("restriction") // eclipse:MARS
 public class StoppableEmbeddedDialogTest extends Application {
+
 	public int scriptTimeout = 5;
 	public int flexibleWait = 60; // possibly too long
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
+	private boolean launched = false;
 	private static Boolean done = false;
 	private static Boolean debug = false;
 	private final int width = 400;
 	private final String projectPrefix = "src/test/java";
 	private static String packagePath;
+	private Stage stage;
+	private Parent parent;
 
 	private final int height = 150;
 
@@ -94,7 +90,29 @@ public class StoppableEmbeddedDialogTest extends Application {
 	private static String osName = getOSName();
 	private static int instanceCount = 0;
 	private static String altURL = "https://www.linux.org.ru/";
+
+	public Stage getStage() {
+		return stage;
+	}
+
+	public void setStage(Stage data) {
+		System.err.println(
+				"Saving the stage: " + (data == null ? "null" : data.toString()));
+		this.stage = data;
+	}
+
+	public Parent getParent() {
+		return parent;
+	}
+
+	public void setParent(Parent data) {
+		System.err.println(
+				"Saving the parent: " + (data == null ? "null" : data.toString()));
+		this.parent = data;
+	}
+
 	private static final StringBuffer verificationErrors = new StringBuffer();
+
 	public WebDriver driver;
 	public WebDriverWait wait;
 	public Actions actions;
@@ -229,11 +247,13 @@ public class StoppableEmbeddedDialogTest extends Application {
 	@AfterTest(alwaysRun = true)
 	public void afterTest() {
 		System.err.println("Finish the test");
-		driver.quit();
+		if (driver != null) {
+			driver.quit();
+		}
 	}
 
 	@Test(enabled = true)
-	public void test1() {
+	public void embeddedDialogHoldTest1() {
 		// String handle = createWindow(altURL);
 		String name = "Window_" + instanceCount++;
 		// inject an anchor element - will likely appear at the bottom of the page
@@ -243,16 +263,55 @@ public class StoppableEmbeddedDialogTest extends Application {
 		// scroll to the new page element
 		scroll(element);
 		// stop the test until user chooses to continue
-		System.err.println("Hold the test: Creating new dialog on the display");
+		System.err.println("Hold the test1: Creating new dialog on the display");
 		// NOTE: cannot instantiate JavaFx Application from an inner class, the
 		// BaseTest class itself
 		// must become a subclass of javaFx Application class
+		this.launched = true;
+		Platform.setImplicitExit(false);
 		Application.launch(new String[] {});
 		// continue the test
 		System.err.println("Continue the test");
 		element.click();
 		// TODO: deal with handles and waits to produce a consistent behavior
 		sleep(5000);
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test(enabled = true)
+	public void embeddedDialogHoldTest2() {
+
+		driver.navigate().to("http://www.wikipedia.org/");
+		// String handle = createWindow(altURL);
+		// hold the test until user chooses to continue
+		System.err.println("Hold the test2: Creating new dialog on the display");
+		// must become a subclass of javaFx Application class
+		if (!this.launched) {
+			Application.launch(new String[] {});
+		} else {
+			// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
+			Parent parent = this.getParent();
+			if (parent != null) {
+				// java.lang.IllegalStateException: Not on FX application thread;
+				// currentThread = main
+				parent.setVisible(true);
+				Platform.runLater(() -> {
+					this.parent.setVisible(true);
+				});
+			} else { // gc'd ?
+				System.err.println("Cannot currently show the dialog");
+			}
+			Platform.runLater(() -> {
+				// never reached
+				Stage stage = new Stage();
+				stage.show();
+			});
+		}
+		// continue the test
+		System.err.println("Continue the test");
+		// TODO: deal with handles and waits to produce a consistent behavior
+		sleep(5000);
+
 	}
 
 	private void injectElement(String name) {
@@ -371,8 +430,12 @@ public class StoppableEmbeddedDialogTest extends Application {
 						.toString()));
 		Parent parent = fxmlLoader.load();
 		VanillaControllerEx controller = fxmlLoader.getController();
+		this.launched = true;
+		this.setStage(stage);
+		System.err.println(
+				"Saving the parent: " + (parent == null ? "null" : parent.toString()));
+		this.setParent(parent);
 		controller.setMainStage(stage);
-
 		Scene scene = new Scene(parent, 600, 650); // TODO: measure?
 		scene.getStylesheets()
 				.add(
@@ -489,7 +552,9 @@ public class StoppableEmbeddedDialogTest extends Application {
 						System.err.println("image label is not loaded into controller var");
 					}
 					System.err.println(closeMessage);
-					Platform.exit();
+					mainStage.hide();
+					Platform.setImplicitExit(true);
+					// Platform.exit();
 				}
 			});
 		}
