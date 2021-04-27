@@ -52,6 +52,7 @@ No such problem with (also old) build of Firefox and the geckodriver
 ![icon](https://github.com/sergueik/stoppable_test/blob/master/screenshots/capture_stopped_test-swing_hackintosh.png)
 
 ### See Also
+  * ControlsFX [dialogs](https://code.makery.ch/blog/javafx-8-dialogs/)
   * [Eclipse SWT](http://www.java2s.com/Tutorial/Java/0280__SWT/Catalog0280__SWT.htm) tutorial on java2s
   * [JavaFX](http://www.java2s.com/Tutorials/Java/JavaFX/index.htm) tutorial on java2s
   * [Swing](http://www.java2s.com/Tutorial/Java/0240__Swing/Catalog0240__Swing.htm) tutorial on java2s
@@ -62,7 +63,7 @@ No such problem with (also old) build of Firefox and the geckodriver
   * [collection](https://github.com/aterai/java-swing-tips) of core Java Swing GUI programs with small source code examples
   * [discusion](https://toster.ru/q/683495) (in Russian) of multi scene root app lauch error
   * [basic swing dialogs intro](https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html)
-
+  * [FXTrayIcon](https://github.com/dustinkredmond/FXTrayIcon)
 ### License
 This project is licensed under the terms of the MIT license.
 
