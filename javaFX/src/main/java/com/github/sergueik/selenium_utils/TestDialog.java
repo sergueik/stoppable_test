@@ -19,8 +19,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
 @SuppressWarnings("restriction")
+// https://stackoverflow.com/questions/13015537/javafx-class-controller-stage-window-reference/13022321
 public class TestDialog extends Application {
 
+	
 	private static String packagePath;
 	private static Boolean debug = false;
 	private static final String projectPrefix = "src/main/java";
@@ -90,7 +92,7 @@ public class TestDialog extends Application {
 			e.printStackTrace();
 		}
 
-		// longrunning operation runs on different thread
+		// long running operation is to be run on different thread
 		Thread thread = new Thread(new Runnable() {
 
 			@Override
@@ -109,6 +111,7 @@ public class TestDialog extends Application {
 						} else {
 							scene.getRoot().setVisible(false);
 							primaryStage.hide();
+							done = true;
 							// does not return from launch() unless the next line is called.
 							Platform.exit();
 							// System.exit(0);
@@ -124,13 +127,13 @@ public class TestDialog extends Application {
 
 					// UI update is run on the Application thread
 					Platform.runLater(updater);
-					
+
 				}
 			}
 
 		});
 		// don't let thread prevent JVM shutdown
-		thread.setDaemon(true);
+		// thread.setDaemon(true);
 		thread.start();
 
 		Platform.runLater(() -> {
@@ -140,7 +143,7 @@ public class TestDialog extends Application {
 
 	}
 
-	public static void main(String[] args) {
+	public static void main1(String[] args) {
 		try {
 			count = Integer.parseInt(args[0]);
 		} catch (NumberFormatException e) {
@@ -148,7 +151,9 @@ public class TestDialog extends Application {
 		}
 
 		boolean useResourcePath = true;
-		Platform.setImplicitExit(false);
+		// opposite of
+		// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
+		Platform.setImplicitExit(true);
 		// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
 		if (debug) {
 			System.err
@@ -166,6 +171,8 @@ public class TestDialog extends Application {
 		launch(args);
 	}
 
+	private static boolean done = false;
+
 	public static void main2(String[] args) {
 		Platform.setImplicitExit(false);
 		try {
@@ -176,6 +183,8 @@ public class TestDialog extends Application {
 		// java.lang.IllegalStateException:
 		// Not on FX application thread; currentThread = main
 		// new TestDialog().start(new Stage());
+		done = false;
+		// https://stackoverflow.com/questions/22772379/updating-ui-from-different-threads-in-javafx
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -189,10 +198,12 @@ public class TestDialog extends Application {
 				}
 			}
 		});
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		while (!done) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

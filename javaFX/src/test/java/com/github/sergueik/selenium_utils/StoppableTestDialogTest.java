@@ -46,8 +46,6 @@ public class StoppableTestDialogTest {
 	public int implicitWait = 1;
 	public int pollingInterval = 500;
 
-	private static final boolean headless = Boolean
-			.parseBoolean(System.getenv("HEADLESS"));
 	private static String baseURL = "https://www.linux.org"; // "https://www.urbandictionary.com/";
 	// NOTE: some sites may be blocked via content filtering
 	// Sorry, www.urbandictionary.com has been blocked by your network
@@ -67,96 +65,59 @@ public class StoppableTestDialogTest {
 	@BeforeClass
 	public void beforeClass() {
 
-		System.setProperty("webdriver.chrome.driver",
-				osName.equals("windows")
-						? (new File("c:/java/selenium/chromedriver.exe")).getAbsolutePath()
-						: Paths.get(System.getProperty("user.home")).resolve("Downloads")
-								.resolve("chromedriver").toAbsolutePath().toString());
+		System
+				.setProperty("webdriver.chrome.driver",
+						Paths.get(System.getProperty("user.home"))
+								.resolve("Downloads").resolve(osName.equals("windows")
+										? "chromedriver.exe" : "chromedriver")
+								.toAbsolutePath().toString());
 
-		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-		ChromeOptions chromeOptions = new ChromeOptions();
-
-		Map<String, Object> chromePrefs = new HashMap<>();
-		chromePrefs.put("profile.default_content_settings.popups", 0);
-		String downloadFilepath = System.getProperty("user.dir")
-				+ System.getProperty("file.separator") + "target"
-				+ System.getProperty("file.separator");
-		chromePrefs.put("download.prompt_for_download", "false");
-		chromePrefs.put("download.directory_upgrade", "true");
-		chromePrefs.put("plugins.always_open_pdf_externally", "true");
-		chromePrefs.put("download.default_directory", downloadFilepath);
-		chromePrefs.put("enableNetwork", "true");
-		// https://stackoverflow.com/questions/18106588/how-to-disable-cookies-using-webdriver-for-chrome-and-firefox-java
-		// chromePrefs.put("profile.default_content_settings.cookies", 2);
-		// no cookies are allowed
-
-		chromeOptions.setExperimentalOption("prefs", chromePrefs);
-		if (osName.equals("windows")) {
-			// TODO: use jni to find out the CPU arch
-			if (System.getProperty("os.arch").contains("64")) {
-				String[] paths = new String[] {
-						"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-						"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" };
-				// check file existence
-				for (String path : paths) {
-					File exe = new File(path);
-					System.err.println("Inspecting browser path: " + path);
-					if (exe.exists()) {
-						chromeOptions.setBinary(path);
-					}
-				}
-			} else {
-				chromeOptions.setBinary(
-						"c:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
-			}
-		} else {
-		}
+		ChromeOptions options = new ChromeOptions();
+		// see also:
+		// https://ivanderevianko.com/2020/04/disable-logging-in-selenium-chromedriver
+		// https://antoinevastel.com/bot%20detection/2017/08/05/detect-chrome-headless.html
+		// @formatter:off
 		for (String optionAgrument : (new String[] {
-				"--user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0",
-				"--allow-running-insecure-content", "--allow-insecure-localhost",
-				"--enable-local-file-accesses", "--disable-notifications",
-				"--disable-save-password-bubble",
-				/* "start-maximized" , */
-				"--disable-default-app", "disable-infobars", "--no-sandbox ",
-				"--browser.download.folderList=2", "--disable-web-security",
-				"--disable-translate", "--disable-popup-blocking",
-				"--ignore-certificate-errors", "--no-proxy-server",
+				"--allow-insecure-localhost",
+				"--allow-running-insecure-content",
+				"--browser.download.folderList=2",
 				"--browser.helperApps.neverAsk.saveToDisk=image/jpg,text/csv,text/xml,application/xml,application/vnd.ms-excel,application/x-excel,application/x-msexcel,application/excel,application/pdf",
-				String.format("--browser.download.dir=%s", downloadFilepath)
-				/* "--user-data-dir=/path/to/your/custom/profile"  , */
-
+				"--disable-blink-features=AutomationControlled",
+				"--disable-default-app",
+				"--disable-dev-shm-usage",
+				"--disable-extensions",
+				"--disable-gpu",
+				"--disable-infobars",
+				"--disable-in-process-stack-traces",
+				"--disable-logging",
+				"--disable-notifications",
+				"--disable-popup-blocking",
+				"--disable-save-password-bubble",
+				"--disable-translate",
+				"--disable-web-security",
+				"--enable-local-file-accesses",
+				"--ignore-certificate-errors",
+				"--ignore-certificate-errors",
+				"--ignore-ssl-errors=true",
+				"--log-level=3",
+				"--no-proxy-server",
+				"--no-sandbox",
+				"--output=/dev/null",
+				"--ssl-protocol=any",
+				// "--start-fullscreen",
+				// "--start-maximized" ,
+				"--user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20120101 Firefox/33.0",
+				// String.format("--browser.download.dir=%s", downloadFilepath)
+				/*
+				 * "--user-data-dir=/path/to/your/custom/profile",
+				 * "--profile-directory=name_of_custom_profile_directory",
+				 */
 		})) {
-			chromeOptions.addArguments(optionAgrument);
+			options.addArguments(optionAgrument);
 		}
+		// @formatter:on
 
-		// options for headless
-		if (headless) {
-			for (String optionAgrument : (new String[] { "headless",
-					"window-size=1200x800" })) {
-				chromeOptions.addArguments(optionAgrument);
-			}
-		}
-
-		capabilities.setBrowserName(DesiredCapabilities.chrome().getBrowserName());
-		capabilities.setCapability(
-				org.openqa.selenium.chrome.ChromeOptions.CAPABILITY, chromeOptions);
-		capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-		// https://stackoverflow.com/questions/48851036/how-to-configure-log-level-for-selenium
-		// https://stackoverflow.com/questions/28572783/no-log4j2-configuration-file-found-using-default-configuration-logging-only-er
-		LoggingPreferences logPrefs = new LoggingPreferences();
-		logPrefs.enable(LogType.PERFORMANCE, Level.INFO);
-		logPrefs.enable(LogType.BROWSER, Level.INFO);
-		logPrefs.enable(LogType.DRIVER, Level.INFO);
-		/*
-			logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-			logPrefs.enable(LogType.BROWSER, Level.ALL);
-			logPrefs.enable(LogType.DRIVER, Level.ALL);
-		*/
-		capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
-		driver = new ChromeDriver(capabilities);
-
-		// driver.setLogLevel(Level.ALL);
+		driver = new ChromeDriver(options);
 		wait = new WebDriverWait(driver, flexibleWait);
 
 		// Selenium Driver version sensitive code: 3.13.0 vs. 3.8.0 and older
@@ -195,7 +156,7 @@ public class StoppableTestDialogTest {
 		}
 	}
 
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void testDialogTest1() {
 		// String handle = createWindow(altURL);
 		String name = "Window_" + instanceCount++;
@@ -208,9 +169,10 @@ public class StoppableTestDialogTest {
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test1: Creating new dialog on the display");
 		try {
-			TestDialog.main(new String[] { "5" });
+			TestDialog.main1(new String[] { "5" });
 		} catch (IllegalStateException e) {
-			// Application launch must not be called more than once
+			// TODO: java.lang.IllegalStateException: Application launch must not be
+			// called more than once
 			// https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java
 			// for an JavaFX application that is not allowed.
 			// https://stackoverflow.com/questions/38707913/java-lang-illegalstateexception-application-launch-must-not-be-called-more-than?noredirect=1&lq=1
@@ -225,13 +187,15 @@ public class StoppableTestDialogTest {
 		sleep(5000);
 	}
 
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void testDialogTest2() {
 		driver.navigate().to("http://www.wikipedia.org/");
 		// String handle = createWindow(altURL);
 		// stop the test until user chooses to continue
 		System.err.println("Hold the test2: Creating new dialog on the display");
-		TestDialog.main2(new String[] { "10" });
+		TestDialog.main1(new String[] { "10" });
+		// TODO: java.lang.IllegalStateException: Application launch must not be
+		// called more than once
 		// continue the test
 		System.err.println("Continue the test");
 		// TODO: deal with handles and waits to produce a consistent behavior
